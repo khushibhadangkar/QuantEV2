@@ -261,23 +261,6 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-grey-50) !important;
 }
 
-.leaflet-control-layers {
-  border: 1px solid var(--color-border) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 16px rgba(10,22,40,0.1) !important;
-  font-family: var(--font-sans) !important;
-  font-size: 12px !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(16px);
-  padding: 8px 12px !important;
-}
-
-.leaflet-control-layers label {
-  font-size: 12px !important;
-  color: var(--color-ink-2) !important;
-  cursor: pointer;
-}
-
 .leaflet-attribution-flag { display: none !important; }
 
 .leaflet-control-attribution {

@@ -620,6 +620,12 @@ def run_pipeline(
 
     total_demand = sum(demand_by_label.values())
 
+    if _ZONE_NAMES_JSON.exists():
+        try:
+            _cache.zone_names = json.loads(_ZONE_NAMES_JSON.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
     zones_df   = _cache.zones_df.set_index("label")
     zone_details = []
     for lbl in qubo.labels:

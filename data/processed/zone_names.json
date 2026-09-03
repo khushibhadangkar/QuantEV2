@@ -1,34 +1,34 @@
 {
   "Z0": {
-    "primary": "Bantian Sub-District",
-    "secondary": "Longjingao Road area"
+    "primary": "Huawei Tech Campus",
+    "secondary": "Shantangpai & Longjingao Rd"
   },
   "Z1": {
-    "primary": "Bantian Sub-District",
-    "secondary": "Yongxiang Road area"
+    "primary": "Wuhe Commercial Hub",
+    "secondary": "Daguangkan & Yongxiang Rd"
   },
   "Z2": {
-    "primary": "Bantian Sub-District",
-    "secondary": "Jigongshan Tunnel area"
+    "primary": "Yulong / Meiguan Gateway",
+    "secondary": "Jigongshan South Corridor"
   },
   "Z3": {
-    "primary": "Jihua Sub-district",
-    "secondary": null
+    "primary": "Jihua / Cuifeng Center",
+    "secondary": "Cuifeng Haoyuan & Buji Border"
   },
   "Z4": {
-    "primary": "Bantian Sub-District",
-    "secondary": "Changfa Road area"
+    "primary": "Bantian Station Plaza",
+    "secondary": "Lishipai & Changfa Middle Rd"
   },
   "Z5": {
-    "primary": "Bantian Sub-District",
-    "secondary": null
+    "primary": "Guangyayuan Hub",
+    "secondary": "Guangyayuan Village & Metro"
   },
   "Z6": {
-    "primary": "Bantian Sub-District",
-    "secondary": "Jiaxian Road area"
+    "primary": "Tian'an Cloud Park / Xuexiang",
+    "secondary": "Jiaxian Rd & Tech Valley"
   },
   "Z7": {
-    "primary": "Bantian Sub-District",
-    "secondary": null
+    "primary": "Shangxue Innovation Park",
+    "secondary": "Shangxue & Zhujing Industrial Zone"
   }
 }
