@@ -1,0 +1,34 @@
+{
+  "Z0": {
+    "primary": "Bantian Sub-District",
+    "secondary": "Longjingao Road area"
+  },
+  "Z1": {
+    "primary": "Bantian Sub-District",
+    "secondary": "Yongxiang Road area"
+  },
+  "Z2": {
+    "primary": "Bantian Sub-District",
+    "secondary": "Jigongshan Tunnel area"
+  },
+  "Z3": {
+    "primary": "Jihua Sub-district",
+    "secondary": null
+  },
+  "Z4": {
+    "primary": "Bantian Sub-District",
+    "secondary": "Changfa Road area"
+  },
+  "Z5": {
+    "primary": "Bantian Sub-District",
+    "secondary": null
+  },
+  "Z6": {
+    "primary": "Bantian Sub-District",
+    "secondary": "Jiaxian Road area"
+  },
+  "Z7": {
+    "primary": "Bantian Sub-District",
+    "secondary": null
+  }
+}

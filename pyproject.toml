@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evision-backend"
+version = "0.1.0"
+description = "EVision — AI + Quantum EV Charging Infrastructure Optimizer (backend)"
+requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["backend*", "ai_model*", "quantum*"]

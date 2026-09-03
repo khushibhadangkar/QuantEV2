@@ -1,0 +1,54 @@
+{
+  "model": "RandomForestRegressor",
+  "target": "target_volume_kwh",
+  "features": [
+    "hour",
+    "day_of_week",
+    "is_weekend",
+    "month",
+    "lag_1h",
+    "lag_24h",
+    "lag_168h",
+    "rolling_mean_24h"
+  ],
+  "rf_params": {
+    "n_estimators": 50,
+    "max_depth": 12,
+    "min_samples_leaf": 4,
+    "max_features": "sqrt",
+    "n_jobs": -1,
+    "random_state": 42
+  },
+  "train_time_s": 4.82,
+  "split": {
+    "train_start": "2022-09-08 00:00:00",
+    "train_end": "2023-01-07 17:00:00",
+    "train_rows": 803550,
+    "val_start": "2023-01-07 18:00:00",
+    "val_end": "2023-02-02 19:00:00",
+    "val_rows": 172150,
+    "test_start": "2023-02-02 20:00:00",
+    "test_end": "2023-02-28 22:00:00",
+    "test_rows": 172425
+  },
+  "val_metrics": {
+    "mae": 51.29935897162272,
+    "rmse": 209.86918428385977,
+    "r2": 0.8915203019535722
+  },
+  "test_metrics": {
+    "mae": 55.12980884902547,
+    "rmse": 222.98076823259717,
+    "r2": 0.9330337843506279
+  },
+  "feature_importances": {
+    "hour": 0.044203,
+    "day_of_week": 0.001677,
+    "is_weekend": 0.000426,
+    "month": 0.001724,
+    "lag_1h": 0.134789,
+    "lag_24h": 0.360252,
+    "lag_168h": 0.174818,
+    "rolling_mean_24h": 0.282111
+  }
+}

@@ -1,0 +1,342 @@
+{
+  "metadata": {
+    "date": "2026-08-27T16:34:29.067127",
+    "script": "experiments/08_end_to_end_pipeline.py",
+    "qiskit_version": "2.5.1",
+    "aer_version": "0.17.2",
+    "description": "End-to-end QuantEV pipeline: AI demand prediction \u2192 QUBO construction \u2192 QAOA optimisation (Aer simulator).",
+    "pipeline_stages": [
+      "Stage 1: RF demand prediction (feature_pipeline.joblib)",
+      "Stage 2: QUBO construction (backend.quantum.qubo.build_qubo)",
+      "Stage 3a: Classical solver (backend.optimization.classical_solver)",
+      "Stage 3b: QAOA Aer simulator (qiskit_optimization QAOA + COBYLA)",
+      "Stage 4: Recommendation (QAOA preferred if feasible)"
+    ]
+  },
+  "ai_demand_prediction": {
+    "model": "RandomForestRegressor",
+    "pipeline_file": "ai_model/models/feature_pipeline.joblib",
+    "features_used": [
+      "hour",
+      "day_of_week",
+      "is_weekend",
+      "month",
+      "lag_1h",
+      "lag_24h",
+      "lag_168h",
+      "rolling_mean_24h"
+    ],
+    "test_split_start": "2023-02-02 20:00:00",
+    "test_split_end": "2023-02-28 22:00:00",
+    "test_rows_per_zone": 627,
+    "prediction_time_ms": 219.67,
+    "test_r2": 0.9330337843506279,
+    "test_mae": 55.12980884902547,
+    "test_rmse": 222.98076823259717,
+    "live_predictions": {
+      "Z0": 3719.897,
+      "Z1": 236.4985,
+      "Z2": 461.3985,
+      "Z3": 377.9542,
+      "Z4": 45.6248,
+      "Z5": 39.0113,
+      "Z6": 64.4748,
+      "Z7": 20.6571
+    },
+    "stored_predictions": {
+      "Z0": 3741.76,
+      "Z1": 236.74,
+      "Z2": 467.2,
+      "Z3": 383.59,
+      "Z4": 45.34,
+      "Z5": 38.94,
+      "Z6": 64.57,
+      "Z7": 20.51
+    },
+    "max_drift_kwh_h": 21.863,
+    "drift_note": "live_predictions are the mean RF model outputs on the held-out test split (2023-02-02 \u2192 2023-02-28). stored_predictions are the pre-computed values in candidate_zones.csv. Both are used interchangeably; the QUBO is built from live_predictions."
+  },
+  "qubo": {
+    "n_qubits": 8,
+    "budget_k": 3,
+    "lambda": 10.0,
+    "c_values": {
+      "Z0": 37.722882,
+      "Z1": 5.262497,
+      "Z2": 6.206173,
+      "Z3": 5.411287,
+      "Z4": 2.009304,
+      "Z5": 2.311811,
+      "Z6": 2.425149,
+      "Z7": 2.156668
+    },
+    "build_time_s": 0.024516,
+    "global_minimum_bits": "10110000",
+    "global_minimum_energy": -139.340342
+  },
+  "classical_result": {
+    "method": "classical_exhaustive",
+    "selected_zones": [
+      "Z0",
+      "Z1",
+      "Z2"
+    ],
+    "qubo_energy": -139.191551,
+    "feasible": true,
+    "n_stations": 3,
+    "covered_demand_kwh_h": 4965.5162,
+    "coverage_pct": 100.0,
+    "n_combinations": 56,
+    "runtime_s": 0.000213,
+    "matches_qubo_optimum": false
+  },
+  "qaoa_result": {
+    "method": "qaoa_aer_simulator",
+    "reps": 1,
+    "seed": 42,
+    "shots": 2048,
+    "selected_zones": [
+      "Z0",
+      "Z2",
+      "Z3"
+    ],
+    "best_bitstring": "10110000",
+    "qubo_energy": -139.340342,
+    "feasible": true,
+    "n_stations": 3,
+    "success_probability": 0.05078125,
+    "circuit_depth": 17,
+    "n_qubits": 8,
+    "runtime_s": 0.278,
+    "eigenvalue": -21.30190997,
+    "optimal_parameters": [
+      -0.96513,
+      2.522545
+    ],
+    "top10_samples": [
+      {
+        "bitstring": "11110000",
+        "probability": 0.14013672,
+        "qubo_energy": -134.602839,
+        "n_stations": 4,
+        "feasible": false,
+        "zones": [
+          "Z0",
+          "Z1",
+          "Z2",
+          "Z3"
+        ]
+      },
+      {
+        "bitstring": "11010000",
+        "probability": 0.08300781,
+        "qubo_energy": -138.396666,
+        "n_stations": 3,
+        "feasible": true,
+        "zones": [
+          "Z0",
+          "Z1",
+          "Z3"
+        ]
+      },
+      {
+        "bitstring": "11110010",
+        "probability": 0.07324219,
+        "qubo_energy": -107.027987,
+        "n_stations": 5,
+        "feasible": false,
+        "zones": [
+          "Z0",
+          "Z1",
+          "Z2",
+          "Z3",
+          "Z6"
+        ]
+      },
+      {
+        "bitstring": "10110000",
+        "probability": 0.05078125,
+        "qubo_energy": -139.340342,
+        "n_stations": 3,
+        "feasible": true,
+        "zones": [
+          "Z0",
+          "Z2",
+          "Z3"
+        ]
+      },
+      {
+        "bitstring": "11010010",
+        "probability": 0.04248047,
+        "qubo_energy": -130.821814,
+        "n_stations": 4,
+        "feasible": false,
+        "zones": [
+          "Z0",
+          "Z1",
+          "Z3",
+          "Z6"
+        ]
+      },
+      {
+        "bitstring": "11110100",
+        "probability": 0.04052734,
+        "qubo_energy": -106.914649,
+        "n_stations": 5,
+        "feasible": false,
+        "zones": [
+          "Z0",
+          "Z1",
+          "Z2",
+          "Z3",
+          "Z5"
+        ]
+      },
+      {
+        "bitstring": "01110000",
+        "probability": 0.03564453,
+        "qubo_energy": -106.879957,
+        "n_stations": 3,
+        "feasible": true,
+        "zones": [
+          "Z1",
+          "Z2",
+          "Z3"
+        ]
+      },
+      {
+        "bitstring": "10010000",
+        "probability": 0.03320312,
+        "qubo_energy": -123.134169,
+        "n_stations": 2,
+        "feasible": false,
+        "zones": [
+          "Z0",
+          "Z3"
+        ]
+      },
+      {
+        "bitstring": "11010100",
+        "probability": 0.03173828,
+        "qubo_energy": -130.708476,
+        "n_stations": 4,
+        "feasible": false,
+        "zones": [
+          "Z0",
+          "Z1",
+          "Z3",
+          "Z5"
+        ]
+      },
+      {
+        "bitstring": "11110110",
+        "probability": 0.02734375,
+        "qubo_energy": -59.339798,
+        "n_stations": 6,
+        "feasible": false,
+        "zones": [
+          "Z0",
+          "Z1",
+          "Z2",
+          "Z3",
+          "Z5",
+          "Z6"
+        ]
+      }
+    ],
+    "matches_qubo_optimum": true,
+    "energy_gap": 0.357106
+  },
+  "recommendation": {
+    "method": "qaoa_aer_simulator",
+    "selected_zones": [
+      "Z0",
+      "Z2",
+      "Z3"
+    ],
+    "qubo_energy": -139.340342,
+    "feasible": true,
+    "n_stations": 3,
+    "matches_qubo_optimum": true,
+    "predicted_demand": {
+      "Z0": 3719.897,
+      "Z2": 461.3985,
+      "Z3": 377.9542
+    },
+    "total_predicted_demand_kwh_h": 4965.5162,
+    "zone_details": [
+      {
+        "label": "Z0",
+        "tazid": 1026,
+        "longitude": 114.080807,
+        "latitude": 22.634883,
+        "live_pred_kwh_h": 3719.897,
+        "qubo_c_value": 37.722882,
+        "selected": true
+      },
+      {
+        "label": "Z1",
+        "tazid": 746,
+        "longitude": 114.072886,
+        "latitude": 22.623009,
+        "live_pred_kwh_h": 236.4985,
+        "qubo_c_value": 5.262497,
+        "selected": false
+      },
+      {
+        "label": "Z2",
+        "tazid": 716,
+        "longitude": 114.073896,
+        "latitude": 22.609345,
+        "live_pred_kwh_h": 461.3985,
+        "qubo_c_value": 6.206173,
+        "selected": true
+      },
+      {
+        "label": "Z3",
+        "tazid": 965,
+        "longitude": 114.098666,
+        "latitude": 22.616885,
+        "live_pred_kwh_h": 377.9542,
+        "qubo_c_value": 5.411287,
+        "selected": true
+      },
+      {
+        "label": "Z4",
+        "tazid": 706,
+        "longitude": 114.054821,
+        "latitude": 22.633648,
+        "live_pred_kwh_h": 45.6248,
+        "qubo_c_value": 2.009304,
+        "selected": false
+      },
+      {
+        "label": "Z5",
+        "tazid": 745,
+        "longitude": 114.060543,
+        "latitude": 22.621869,
+        "live_pred_kwh_h": 39.0113,
+        "qubo_c_value": 2.311811,
+        "selected": false
+      },
+      {
+        "label": "Z6",
+        "tazid": 744,
+        "longitude": 114.068025,
+        "latitude": 22.649986,
+        "live_pred_kwh_h": 64.4748,
+        "qubo_c_value": 2.425149,
+        "selected": false
+      },
+      {
+        "label": "Z7",
+        "tazid": 737,
+        "longitude": 114.08439,
+        "latitude": 22.652124,
+        "live_pred_kwh_h": 20.6571,
+        "qubo_c_value": 2.156668,
+        "selected": false
+      }
+    ]
+  }
+}

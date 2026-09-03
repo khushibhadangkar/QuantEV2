@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: quantev-backend
+    runtime: python
+    # Pin to Python 3.14 — same version used to create the serialised model artifacts.
+    # Changing this will require retraining the model (run build.sh manually or
+    # trigger a fresh deploy after updating PYTHON_VERSION).
+    pythonVersion: "3.14"
+    buildCommand: "./build.sh"
+    startCommand: "uvicorn backend.api.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.14"
+    healthCheckPath: /api/v1/health
+    autoDeploy: true

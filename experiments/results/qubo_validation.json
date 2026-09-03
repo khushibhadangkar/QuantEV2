@@ -1,0 +1,96 @@
+{
+  "qubo_params": {
+    "lambda": 10.0,
+    "budget_K": 3,
+    "n_zones": 8,
+    "d_min_m": 100.0,
+    "objective": "maximise \u03a3_j c_j\u00b7x_j  (demand-weighted proximity)",
+    "constraint": "\u03a3_j x_j = K = 3  (penalty \u03bb(\u03a3x_j - K)\u00b2)"
+  },
+  "c_values": {
+    "Z0": 37.945572,
+    "Z1": 5.284738,
+    "Z2": 6.273908,
+    "Z3": 5.477968,
+    "Z4": 2.014726,
+    "Z5": 2.322688,
+    "Z6": 2.436162,
+    "Z7": 2.166491
+  },
+  "Q_diagonal": {
+    "Z0": -87.945572,
+    "Z1": -55.284738,
+    "Z2": -56.273908,
+    "Z3": -55.477968,
+    "Z4": -52.014726,
+    "Z5": -52.322688,
+    "Z6": -52.436162,
+    "Z7": -52.166491
+  },
+  "Q_offdiag_value": 20.0,
+  "metrics": {
+    "global_min_energy": -139.697448,
+    "winner": [
+      "Z0",
+      "Z2",
+      "Z3"
+    ],
+    "best_feasible_energy": -139.697448,
+    "best_infeasible_energy": -134.982186,
+    "feasibility_gap": 4.715262,
+    "spearman_rho": 1.0,
+    "n_bitstrings": 256,
+    "n_feasible_combos": 56,
+    "n_checks": 9,
+    "n_passed": 9
+  },
+  "checks": [
+    {
+      "name": "Q matrix consistency (upper \u2261 sym)",
+      "status": "PASS",
+      "detail": "max |E_upper - E_sym| = 2.84e-14"
+    },
+    {
+      "name": "Unique global minimum",
+      "status": "PASS",
+      "detail": "1 bitstring(s) at E = -139.697448"
+    },
+    {
+      "name": "Global minimum is feasible (k=3)",
+      "status": "PASS",
+      "detail": "k=3, stations=Z0|Z2|Z3"
+    },
+    {
+      "name": "Winner is {Z0, Z2, Z3}",
+      "status": "PASS",
+      "detail": "got ['Z0', 'Z2', 'Z3']"
+    },
+    {
+      "name": "Best feasible < best infeasible (penalty sufficient)",
+      "status": "PASS",
+      "detail": "feasibility gap = 4.7153 energy units"
+    },
+    {
+      "name": "QUBO ranking \u2261 classical ranking (Spearman \u03c1 = 1.0)",
+      "status": "PASS",
+      "detail": "\u03c1 = 1.0000000000"
+    },
+    {
+      "name": "QUBO winner maximises classical objective",
+      "status": "PASS",
+      "detail": "classical argmax = ['Z0', 'Z2', 'Z3']"
+    },
+    {
+      "name": "energy() and energy_sym() produce identical ranking",
+      "status": "PASS",
+      "detail": "upper-triangular and symmetric evaluation consistent"
+    },
+    {
+      "name": "No k=3 combo has lower energy than winner",
+      "status": "PASS",
+      "detail": "min k=3 energy = -139.697448, winner energy = -139.697448"
+    }
+  ],
+  "all_passed": true,
+  "runtime_s": 0.004306
+}

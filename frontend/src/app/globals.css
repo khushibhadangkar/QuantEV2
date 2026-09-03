@@ -1,0 +1,294 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+/* ═══════════════════════════════════════════════════════════════
+   QuantEV — Premium Consumer Design System
+   Apple-inspired · Times New Roman · White / Grey / Deep Navy
+═══════════════════════════════════════════════════════════════ */
+
+@theme inline {
+  --font-serif: "Times New Roman", "Times", Georgia, serif;
+  --font-sans:  -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:  "SF Mono", "JetBrains Mono", ui-monospace, monospace;
+
+  --color-white:          #ffffff;
+  --color-canvas:         #f7f8fa;
+  --color-fog:            #f0f2f5;
+  --color-border:         #e3e6ec;
+  --color-border-subtle:  #eef0f4;
+
+  --color-grey-50:  #f8f9fb;
+  --color-grey-100: #f0f2f5;
+  --color-grey-200: #e3e6ec;
+  --color-grey-300: #c8cdd8;
+  --color-grey-400: #9aa0af;
+  --color-grey-500: #6b7282;
+  --color-grey-600: #4a5166;
+  --color-grey-700: #333849;
+
+  --color-navy-950: #06101e;
+  --color-navy-900: #0a1628;
+  --color-navy-800: #0f2040;
+  --color-navy-700: #162d58;
+  --color-navy-600: #1e3d75;
+  --color-navy-500: #2a528f;
+  --color-navy-400: #4072b8;
+  --color-navy-300: #6a97d4;
+  --color-navy-200: #a8c4e8;
+  --color-navy-100: #d9e8f7;
+  --color-navy-50:  #eef5fc;
+
+  --color-ink:   #0a1628;
+  --color-ink-2: #333849;
+  --color-ink-3: #6b7282;
+  --color-ink-4: #9aa0af;
+
+  --color-positive:    #0f7a4a;
+  --color-positive-bg: #edfaf3;
+  --color-negative:    #b32020;
+  --color-negative-bg: #fdf2f2;
+}
+
+/* ── Reset & base ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Do NOT set height:100% on html/body — the page uses 100dvh on its own root */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Times New Roman", "Times", Georgia, serif;
+  background: var(--color-white);
+  color: var(--color-ink);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Times New Roman", "Times", Georgia, serif;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+::selection {
+  background: var(--color-navy-100);
+  color: var(--color-navy-900);
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-grey-300); border-radius: 99px; }
+
+:focus-visible {
+  outline: 2px solid var(--color-navy-400);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ── Glass ────────────────────────────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+}
+
+.glass-dark {
+  background: rgba(10, 22, 40, 0.88);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+/* ── Animations ───────────────────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes bar-fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Pulse rings for map markers */
+@keyframes pulse-1 {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+@keyframes pulse-2 {
+  0%   { transform: scale(1);   opacity: 0.4; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+@keyframes pulse-3 {
+  0%   { transform: scale(1);   opacity: 0.25; }
+  100% { transform: scale(4.4); opacity: 0; }
+}
+
+/* Search expanding circle */
+@keyframes expand-circle {
+  0%   { transform: scale(0); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+/* Station candidate appear */
+@keyframes station-appear {
+  0%   { transform: scale(0) translateY(4px); opacity: 0; }
+  60%  { transform: scale(1.15) translateY(-2px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* User location drop */
+@keyframes drop-in {
+  0%   { transform: translateY(-20px) scale(0.8); opacity: 0; }
+  70%  { transform: translateY(4px) scale(1.05); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.anim-fade-up    { animation: fade-up   0.55s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-fade-in    { animation: fade-in   0.4s ease both; }
+.anim-scale-in   { animation: scale-in  0.4s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-slide-up   { animation: slide-up  0.5s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-slide-down { animation: slide-down 0.35s cubic-bezier(0.22,1,0.36,1) both; }
+
+.d-0 { animation-delay: 0s; }
+.d-1 { animation-delay: 0.07s; }
+.d-2 { animation-delay: 0.14s; }
+.d-3 { animation-delay: 0.21s; }
+.d-4 { animation-delay: 0.28s; }
+.d-5 { animation-delay: 0.35s; }
+.d-6 { animation-delay: 0.42s; }
+.d-7 { animation-delay: 0.49s; }
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-grey-100) 25%,
+    var(--color-grey-50)  50%,
+    var(--color-grey-100) 75%
+  );
+  background-size: 600px 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.numeric {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.01em;
+}
+
+/* ── Leaflet overrides ────────────────────────────────────────── */
+.leaflet-container {
+  font-family: "Times New Roman", "Times", Georgia, serif !important;
+  background: #dde4ed;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 16px !important;
+  box-shadow: 0 16px 48px rgba(10,22,40,0.18) !important;
+  border: 1px solid rgba(255,255,255,0.6) !important;
+  padding: 0 !important;
+  overflow: hidden;
+  background: rgba(255,255,255,0.95) !important;
+  backdrop-filter: blur(20px);
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: 1.5;
+  width: auto !important;
+}
+
+.leaflet-popup-tip-container { display: none !important; }
+
+.leaflet-popup-close-button {
+  top: 12px !important;
+  right: 14px !important;
+  color: var(--color-ink-4) !important;
+  font-size: 20px !important;
+  width: 24px !important;
+  height: 24px !important;
+  line-height: 24px !important;
+}
+
+.leaflet-control-zoom {
+  border: 1px solid var(--color-border) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(10,22,40,0.1) !important;
+}
+
+.leaflet-control-zoom a {
+  background: white !important;
+  color: var(--color-ink-2) !important;
+  border-color: var(--color-border) !important;
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  font-size: 16px !important;
+  font-family: var(--font-sans) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: var(--color-grey-50) !important;
+}
+
+.leaflet-control-layers {
+  border: 1px solid var(--color-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(10,22,40,0.1) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 12px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(16px);
+  padding: 8px 12px !important;
+}
+
+.leaflet-control-layers label {
+  font-size: 12px !important;
+  color: var(--color-ink-2) !important;
+  cursor: pointer;
+}
+
+.leaflet-attribution-flag { display: none !important; }
+
+.leaflet-control-attribution {
+  font-family: var(--font-sans) !important;
+  font-size: 9px !important;
+  color: var(--color-ink-4) !important;
+  background: rgba(255,255,255,0.75) !important;
+  backdrop-filter: blur(8px);
+  border-radius: 6px !important;
+  padding: 2px 6px !important;
+}
+
+/* Hide default Leaflet marker icons (we use divIcon) */
+.leaflet-default-icon-path { display: none; }

@@ -1,0 +1,34 @@
+# QuantEV production dependencies
+# Generated for Render free-tier deployment (512 MiB RAM)
+# Only packages actually imported by backend/ code are included.
+# Dev/Jupyter/notebook packages are intentionally excluded.
+
+# ── Web framework ────────────────────────────────────────────────────────────
+fastapi==0.141.1
+uvicorn[standard]==0.52.1
+pydantic==2.13.4
+pydantic-settings==2.15.0
+python-multipart==0.0.32
+python-dotenv==1.2.2
+email-validator==2.3.0
+
+# ── Data / ML ────────────────────────────────────────────────────────────────
+numpy==2.5.1
+pandas==3.0.5
+pyarrow==25.0.0
+scikit-learn==1.9.0
+joblib==1.5.3
+
+# ── Quantum ──────────────────────────────────────────────────────────────────
+qiskit==2.5.1
+qiskit-aer==0.17.2
+qiskit-optimization==0.7.0
+# qiskit-optimization pulls these in; pin for reproducibility
+rustworkx==0.18.1
+networkx==3.6.1
+scipy==1.18.0
+
+# ── Utilities ────────────────────────────────────────────────────────────────
+httpx==0.28.1
+requests==2.34.2
+python-dateutil==2.9.0.post0

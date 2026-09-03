@@ -1,0 +1,74 @@
+{
+  "solver": "exhaustive_classical",
+  "budget_K": 3,
+  "n_combinations": 56,
+  "runtime_s": 0.000364,
+  "winning_stations": [
+    "Z0",
+    "Z1",
+    "Z2"
+  ],
+  "covered_zones": [
+    "Z0",
+    "Z1",
+    "Z2",
+    "Z3",
+    "Z4",
+    "Z5",
+    "Z6",
+    "Z7"
+  ],
+  "covered_demand_kwh_h": 4998.65,
+  "total_demand_kwh_h": 4998.65,
+  "coverage_pct": 100.0,
+  "zone_details": [
+    {
+      "label": "Z0",
+      "demand_kwh_h": 3741.76,
+      "selected": true,
+      "covered": true
+    },
+    {
+      "label": "Z1",
+      "demand_kwh_h": 236.74,
+      "selected": true,
+      "covered": true
+    },
+    {
+      "label": "Z2",
+      "demand_kwh_h": 467.2,
+      "selected": true,
+      "covered": true
+    },
+    {
+      "label": "Z3",
+      "demand_kwh_h": 383.59,
+      "selected": false,
+      "covered": true
+    },
+    {
+      "label": "Z4",
+      "demand_kwh_h": 45.34,
+      "selected": false,
+      "covered": true
+    },
+    {
+      "label": "Z5",
+      "demand_kwh_h": 38.94,
+      "selected": false,
+      "covered": true
+    },
+    {
+      "label": "Z6",
+      "demand_kwh_h": 64.57,
+      "selected": false,
+      "covered": true
+    },
+    {
+      "label": "Z7",
+      "demand_kwh_h": 20.51,
+      "selected": false,
+      "covered": true
+    }
+  ]
+}

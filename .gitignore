@@ -1,0 +1,50 @@
+# ML model artifacts — too large for git (300+ MB each).
+# Regenerated at deploy time by build.sh using the committed parquet data.
+ai_model/models/*.joblib
+ai_model/models/*.pkl
+ai_model/models/*.h5
+ai_model/models/*.pt
+ai_model/models/*.pth
+ai_model/models/*.bin
+*.pkl
+*.joblib
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.so
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+experiments/*.ipynb~
+
+# Raw station data (large)
+data/raw/*
+!data/raw/.gitkeep
+
+# Processed data — include small parquet + CSVs used by the API.
+# Exclude the 137 MB demand_hourly.csv (parquet is sufficient).
+data/processed/demand_hourly.csv
+
+# Next.js
+frontend/.next/
+frontend/node_modules/
+frontend/.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Local development requirements
+requirements-windows.txt
+
