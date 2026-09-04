@@ -9,68 +9,43 @@ import dynamic from "next/dynamic";
 import { useOptimize } from "@/hooks/useOptimize";
 
 import { SearchBar } from "@/components/SearchBar";
-
 import { OptimizationSequence } from "@/components/OptimizationSequence";
-
 import { ResultPanel } from "@/components/ResultPanel";
-
 import { PlanningControls } from "@/components/PlanningControls";
-
 import { HowItWorks } from "@/components/HowItWorks";
-
+import { QuantumAdvantageModal } from "@/components/QuantumAdvantageModal";
+import { ExecutiveReportModal } from "@/components/ExecutiveReportModal";
 import type { ChargingMapHandle } from "@/components/ChargingMap";
-
 import type { PlanningScenario } from "@/types/api";
 
-
-
 const ChargingMap = dynamic(
-
   () => import("@/components/ChargingMap"),
-
   {
-
     ssr: false,
-
     loading: () => (
-
       <div style={{ width: "100%", height: "100%", background: "#dde4ed" }} className="skeleton" />
-
     ),
-
   }
-
 );
-
-
 
 type UIPhase = "idle" | "located" | "searching" | "result" | "error";
 
-
-
 export default function Page() {
-
   const { state, run, reset, lastRunParams } = useOptimize();
-
   const mapRef = useRef<ChargingMapHandle>(null);
-
   const resultScrollRef = useRef<HTMLDivElement>(null);
 
-
-
   const [phase, setPhase] = useState<UIPhase>("idle");
-
   const [userLat, setUserLat] = useState(22.625);
-
   const [userLng, setUserLng] = useState(114.075);
-
   const [locationName, setLocationName] = useState("Shenzhen");
-
   const [stationCount, setStationCount] = useState(3);
-
   const [scenario, setScenario] = useState<PlanningScenario>("all_hours");
-
   const [sequenceStep, setSequenceStep] = useState(0);
+
+  // Winner feature modals
+  const [quantumModalOpen, setQuantumModalOpen] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
 
 
 
@@ -262,27 +237,67 @@ export default function Page() {
 
 
 
-        {phase !== "idle" && (
-
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <button
-
-            onClick={handleReset}
-
-            style={{ fontFamily: "Times New Roman, serif", fontSize: "13px", color: "var(--color-ink-3)", background: "none", border: "none", cursor: "pointer", padding: "6px 10px", borderRadius: "8px", transition: "color 0.15s ease" }}
-
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-ink)")}
-
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-ink-3)")}
-
+            type="button"
+            onClick={() => setQuantumModalOpen(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "5px 12px",
+              borderRadius: "8px",
+              border: "1px solid var(--color-navy-200)",
+              background: "var(--color-navy-50)",
+              color: "var(--color-navy-900)",
+              fontFamily: "Times New Roman, serif",
+              fontSize: "12px",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
+            title="Inspect Combinatorial Scaling & IBM Fez Heron QPU Verification"
           >
-
-            New analysis
-
+            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#00d084" }} />
+            Quantum Scalability (IBM Fez)
           </button>
 
-        )}
+          <button
+            type="button"
+            onClick={() => setReportModalOpen(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "5px 12px",
+              borderRadius: "8px",
+              border: "1px solid var(--color-border)",
+              background: "white",
+              color: "var(--color-ink-2)",
+              fontFamily: "Times New Roman, serif",
+              fontSize: "12px",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
+            title="Generate Municipal Infrastructure Briefing (PDF)"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            Municipal Briefing
+          </button>
 
-        {phase === "idle" && <div style={{ width: "80px" }} />}
+          {phase !== "idle" && (
+            <button
+              onClick={handleReset}
+              style={{ fontFamily: "Times New Roman, serif", fontSize: "13px", color: "var(--color-ink-3)", background: "none", border: "none", cursor: "pointer", padding: "6px 10px", borderRadius: "8px", transition: "color 0.15s ease" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-ink)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-ink-3)")}
+            >
+              New analysis
+            </button>
+          )}
+        </div>
 
       </header>
 
@@ -344,57 +359,108 @@ export default function Page() {
 
 
 
-          {/* ── IDLE ──────────────────────────────────────── */}
+          {/* ── IDLE & LOCATED (PLANNING) ────────────────── */}
 
-          {phase === "idle" && (
+          {(phase === "idle" || phase === "located") && (
 
             <div className="anim-fade-in">
 
-              <div className="glass" style={{ borderRadius: "20px", marginBottom: "10px", boxShadow: "0 8px 32px rgba(10,22,40,0.1)", overflow: "hidden" }}>
+              <div className="glass" style={{ borderRadius: "20px", boxShadow: "0 8px 32px rgba(10,22,40,0.1)", overflow: "visible" }}>
 
-                <div style={{ padding: "20px 22px 16px" }}>
-
+                <div style={{ padding: "20px 22px 14px" }}>
                   <h1 style={{ fontFamily: "Times New Roman, serif", fontSize: "21px", fontWeight: 400, letterSpacing: "-0.015em", color: "var(--color-ink)", marginBottom: "6px", lineHeight: 1.2 }}>
-
                     Find the best locations for
-
                     <br /><em style={{ color: "var(--color-navy-700)" }}>new charging infrastructure</em>
-
                   </h1>
-
-                  <p style={{ fontFamily: "Times New Roman, serif", fontSize: "13px", color: "var(--color-ink-3)", lineHeight: 1.5, margin: 0 }}>
-
+                  <p style={{ fontFamily: "Times New Roman, serif", fontSize: "13px", color: "var(--color-ink-3)", lineHeight: 1.5, margin: "0 0 12px" }}>
                     Select a planning area, set your station budget, and let AI and quantum optimisation identify the ideal sites.
-
                   </p>
 
+                  {/* Story Presets for rapid presentation / judge demo */}
+                  <div>
+                    <div style={{ fontFamily: "Times New Roman, serif", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-ink-4)", marginBottom: "6px" }}>
+                      Demo Presets:
+                    </div>
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                      {[
+                        { label: "🏙️ CBD Rush", name: "Futian CBD", lat: 22.5415, lng: 114.0573, count: 3, scen: "morning_peak" as const },
+                        { label: "🌙 Night Depot", name: "Longhua District", lat: 22.6876, lng: 114.0401, count: 4, scen: "overnight" as const },
+                        { label: "⚡ Grid Budget", name: "Bantian, Longgang", lat: 22.6350, lng: 114.0820, count: 2, scen: "afternoon" as const },
+                      ].map((preset) => (
+                        <button
+                          key={preset.label}
+                          type="button"
+                          onClick={() => {
+                            setLocationName(preset.name);
+                            setUserLat(preset.lat);
+                            setUserLng(preset.lng);
+                            setStationCount(preset.count);
+                            setScenario(preset.scen);
+                            setPhase("located");
+                            mapRef.current?.setUserLocation(preset.lat, preset.lng);
+                          }}
+                          style={{
+                            padding: "4px 8px",
+                            borderRadius: "6px",
+                            border: "1px solid var(--color-border)",
+                            background: "var(--color-grey-50)",
+                            fontFamily: "Times New Roman, serif",
+                            fontSize: "11px",
+                            color: "var(--color-navy-900)",
+                            cursor: "pointer",
+                            transition: "all 0.12s ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = "var(--color-navy-100)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = "var(--color-grey-50)";
+                          }}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
 
 
-                {/* Default planning area row */}
+                {/* Planning area selector dropdown */}
 
-                <div style={{ padding: "12px 22px", borderTop: "1px solid var(--color-border-subtle)", display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ padding: "12px 22px 14px", borderTop: "1px solid var(--color-border-subtle)", display: "flex", flexDirection: "column", gap: "6px" }}>
 
-                  <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "var(--color-navy-900)", border: "2px solid white", boxShadow: "0 1px 4px rgba(10,22,40,0.25)", flexShrink: 0 }} />
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
 
-                  <div style={{ flex: 1 }}>
+                    <span style={{ fontFamily: "Times New Roman, serif", fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-ink-4)" }}>
 
-                    <div style={{ fontFamily: "Times New Roman, serif", fontSize: "14px", color: "var(--color-ink)" }}>{locationName}</div>
+                      Select a Planning Area
 
-                    <div className="numeric" style={{ fontSize: "11px", color: "var(--color-ink-4)" }}>
+                    </span>
 
-                      {userLat.toFixed(4)}°N, {userLng.toFixed(4)}°E
+                    {phase === "located" && (
 
-                    </div>
+                      <span style={{ fontFamily: "Times New Roman, serif", fontSize: "11px", color: "var(--color-navy-600)" }}>
+
+                        Area centered
+
+                      </span>
+
+                    )}
 
                   </div>
 
-                  <span style={{ fontFamily: "Times New Roman, serif", fontSize: "11px", color: "var(--color-ink-4)", letterSpacing: "0.04em" }}>
+                  <SearchBar
 
-                    Default area
+                    selectedName={locationName}
 
-                  </span>
+                    selectedLat={userLat}
+
+                    selectedLng={userLng}
+
+                    onLocationSelect={handleLocationSelect}
+
+                  />
 
                 </div>
 
@@ -415,102 +481,6 @@ export default function Page() {
 
 
                 {/* Run analysis button */}
-
-                <div style={{ padding: "14px 22px" }}>
-
-                  <button
-
-                    onClick={handleSearch}
-
-                    style={{
-
-                      width: "100%", padding: "13px", borderRadius: "12px", border: "none",
-
-                      background: "var(--color-navy-900)", color: "white",
-
-                      fontFamily: "Times New Roman, serif", fontSize: "15px", letterSpacing: "-0.005em",
-
-                      cursor: "pointer", transition: "opacity 0.2s ease, transform 0.15s ease",
-
-                      boxShadow: "0 4px 16px rgba(10,22,40,0.22)",
-
-                    }}
-
-                    onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.9"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-
-                    onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-
-                  >
-
-                    Run infrastructure analysis →
-
-                  </button>
-
-                </div>
-
-              </div>
-
-              <SearchBar onLocationSelect={handleLocationSelect} />
-
-            </div>
-
-          )}
-
-
-
-          {/* ── LOCATED ───────────────────────────────────── */}
-
-          {phase === "located" && (
-
-            <div className="anim-scale-in">
-
-              <div className="glass" style={{ borderRadius: "20px", overflow: "hidden", boxShadow: "0 8px 32px rgba(10,22,40,0.12)" }}>
-
-                {/* Location row */}
-
-                <div style={{ padding: "16px 22px", borderBottom: "1px solid var(--color-border-subtle)", display: "flex", alignItems: "center", gap: "10px" }}>
-
-                  <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "var(--color-navy-900)", border: "2px solid white", boxShadow: "0 1px 4px rgba(10,22,40,0.25)", flexShrink: 0 }} />
-
-                  <div style={{ flex: 1 }}>
-
-                    <div style={{ fontFamily: "Times New Roman, serif", fontSize: "14px", color: "var(--color-ink)" }}>{locationName}</div>
-
-                    <div className="numeric" style={{ fontSize: "11px", color: "var(--color-ink-4)" }}>
-
-                      {userLat.toFixed(4)}°N, {userLng.toFixed(4)}°E
-
-                    </div>
-
-                  </div>
-
-                  <button onClick={() => setPhase("idle")} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--color-ink-4)", fontFamily: "Times New Roman, serif", fontSize: "13px", padding: "4px 8px" }}>
-
-                    Change
-
-                  </button>
-
-                </div>
-
-
-
-                {/* Planning controls */}
-
-                <PlanningControls
-
-                  stationCount={stationCount}
-
-                  onStationCountChange={setStationCount}
-
-                  scenario={scenario}
-
-                  onScenarioChange={setScenario}
-
-                />
-
-
-
-                {/* Analyse button */}
 
                 <div style={{ padding: "14px 22px" }}>
 
@@ -591,25 +561,17 @@ export default function Page() {
                 />
 
                 <ResultPanel
-
                   data={state.data}
-
                   userLat={userLat}
-
                   userLng={userLng}
-
                   locationName={locationName}
-
                   onReset={handleReset}
-
                   stationCount={stationCount}
-
                   scenario={scenario}
-
                   lastRunParams={lastRunParams}
-
                   onSearch={handleSearch}
-
+                  onOpenQuantumModal={() => setQuantumModalOpen(true)}
+                  onOpenReportModal={() => setReportModalOpen(true)}
                 />
 
               </div>
@@ -749,11 +711,23 @@ export default function Page() {
 
 
       {/* ── HOW IT WORKS ───────────────────────────────────── */}
-
       <HowItWorks data={state.status === "success" ? state.data : undefined} />
 
+      {/* Quantum Scalability & IBM Hardware Modal */}
+      <QuantumAdvantageModal
+        isOpen={quantumModalOpen}
+        onClose={() => setQuantumModalOpen(false)}
+      />
+
+      {/* Municipal Executive Briefing Export Modal */}
+      <ExecutiveReportModal
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        data={state.status === "success" ? state.data : null}
+        locationName={locationName}
+        stationCount={stationCount}
+        scenario={scenario}
+      />
     </div>
-
   );
-
 }
