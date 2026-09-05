@@ -8,13 +8,24 @@ export type AppState = AsyncState<OptimizeResponse>;
 
 export function useOptimize() {
   const [state, setState] = useState<AppState>({ status: "idle" });
-  const [lastRunParams, setLastRunParams] = useState<{ stationCount: number; scenario: PlanningScenario } | null>(null);
+  const [lastRunParams, setLastRunParams] = useState<{ stationCount: number; scenario: PlanningScenario; city: string } | null>(null);
 
-  const run = useCallback(async (stationCount: number = 3, scenario: PlanningScenario = "all_hours") => {
+  const run = useCallback(async (
+    stationCount: number = 3,
+    scenario: PlanningScenario = "all_hours",
+    city: string = "San Francisco",
+  ) => {
     setState({ status: "loading" });
-    setLastRunParams({ stationCount, scenario });
+    setLastRunParams({ stationCount, scenario, city });
     try {
-      const data = await runOptimize({ station_count: stationCount, scenario, reps: 1, shots: 2048, seed: 42 });
+      const data = await runOptimize({
+        city,
+        station_count: stationCount,
+        scenario,
+        reps: 1,
+        shots: 2048,
+        seed: 42,
+      });
       console.info(
         "[QuantEV] Complete →",
         data.recommendation.selected_zones,

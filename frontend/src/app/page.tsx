@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 
 import { useOptimize } from "@/hooks/useOptimize";
 
-import { SearchBar } from "@/components/SearchBar";
+import { CountryCitySelector, CITY_CONFIGS } from "@/components/CountryCitySelector";
 import { OptimizationSequence } from "@/components/OptimizationSequence";
 import { ResultPanel } from "@/components/ResultPanel";
 import { PlanningControls } from "@/components/PlanningControls";
@@ -35,10 +35,12 @@ export default function Page() {
   const mapRef = useRef<ChargingMapHandle>(null);
   const resultScrollRef = useRef<HTMLDivElement>(null);
 
+  const [selectedCountry, setSelectedCountry] = useState("United States");
+  const [selectedCity, setSelectedCity] = useState("San Francisco");
   const [phase, setPhase] = useState<UIPhase>("idle");
-  const [userLat, setUserLat] = useState(22.625);
-  const [userLng, setUserLng] = useState(114.075);
-  const [locationName, setLocationName] = useState("Shenzhen");
+  const [userLat, setUserLat] = useState(CITY_CONFIGS["San Francisco"].lat);
+  const [userLng, setUserLng] = useState(CITY_CONFIGS["San Francisco"].lng);
+  const [locationName, setLocationName] = useState("San Francisco");
   const [stationCount, setStationCount] = useState(3);
   const [scenario, setScenario] = useState<PlanningScenario>("all_hours");
   const [sequenceStep, setSequenceStep] = useState(0);
@@ -47,51 +49,26 @@ export default function Page() {
   const [quantumModalOpen, setQuantumModalOpen] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
 
-
-
-  const handleLocationSelect = useCallback((lat: number, lng: number, name: string) => {
-
-    setUserLat(lat);
-
-    setUserLng(lng);
-
-    setLocationName(name);
-
-    setPhase("located");
-
-    mapRef.current?.setUserLocation(lat, lng);
-
+  const handleCountrySelect = useCallback((country: string) => {
+    setSelectedCountry(country);
   }, []);
 
-
+  const handleCitySelect = useCallback((city: string, country: string, lat: number, lng: number) => {
+    setSelectedCity(city);
+    setSelectedCountry(country);
+    setUserLat(lat);
+    setUserLng(lng);
+    setLocationName(city);
+    setPhase("located");
+    mapRef.current?.setUserLocation(lat, lng);
+  }, []);
 
   const handleSearch = useCallback(async () => {
-
     setPhase("searching");
-
     setSequenceStep(0);
-
-    // Run the optimization sequence animation in parallel with the API call
-
-    // We drive the sequence steps manually via the map
-
-    const apiPromise = run(stationCount, scenario);
-
-
-
-    // The map sequence runs independently; sequence steps 0-4 are paced below
-
-    // We pass setSequenceStep as the callback
-
-    // (zones will be empty for animation — we just need the sequence)
-
-    // Start with a placeholder animation using cached zone positions if available
-
-    // After API resolves, showResults drives the final map state
-
+    const apiPromise = run(stationCount, scenario, selectedCity);
     await apiPromise;
-
-  }, [run, stationCount, scenario]);
+  }, [run, stationCount, scenario, selectedCity]);
 
 
 
@@ -170,19 +147,12 @@ export default function Page() {
 
 
   // Phase label for header
-
   const phaseLabel: Record<UIPhase, string> = {
-
-    idle: "Infrastructure Planning · Shenzhen",
-
-    located: "Planning area selected",
-
-    searching: "Analysing…",
-
-    result: "Recommendation ready",
-
-    error: "Analysis failed",
-
+    idle: `Global Infrastructure Planning · ${selectedCity}, ${selectedCountry}`,
+    located: `Planning Area: ${selectedCity}, ${selectedCountry}`,
+    searching: "Running QAOA Quantum Optimization…",
+    result: `Optimal Sites Identified · ${selectedCity}`,
+    error: "Optimization failed",
   };
 
 
@@ -379,19 +349,23 @@ export default function Page() {
                   {/* Story Presets for rapid presentation / judge demo */}
                   <div>
                     <div style={{ fontFamily: "Times New Roman, serif", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-ink-4)", marginBottom: "6px" }}>
-                      Demo Presets:
+                      Quick City Presets:
                     </div>
                     <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                       {[
-                        { label: "🏙️ CBD Rush", name: "Futian CBD", lat: 22.5415, lng: 114.0573, count: 3, scen: "morning_peak" as const },
-                        { label: "🌙 Night Depot", name: "Longhua District", lat: 22.6876, lng: 114.0401, count: 4, scen: "overnight" as const },
-                        { label: "⚡ Grid Budget", name: "Bantian, Longgang", lat: 22.6350, lng: 114.0820, count: 2, scen: "afternoon" as const },
+                        { label: "🇺🇸 San Francisco", city: "San Francisco", country: "United States", lat: 37.8032, lng: -122.4005, count: 3, scen: "morning_peak" as const },
+                        { label: "🇨🇳 Beijing", city: "Beijing", country: "China", lat: 39.9096, lng: 116.3445, count: 3, scen: "afternoon" as const },
+                        { label: "🇮🇳 Mumbai", city: "Mumbai", country: "India", lat: 19.0467, lng: 72.8911, count: 3, scen: "all_hours" as const },
+                        { label: "🇺🇸 Chicago", city: "Chicago", country: "United States", lat: 41.9003, lng: -87.7022, count: 3, scen: "weekday" as const },
+                        { label: "🇺🇸 Los Angeles", city: "Los Angeles", country: "United States", lat: 34.0923, lng: -118.2904, count: 3, scen: "overnight" as const },
                       ].map((preset) => (
                         <button
                           key={preset.label}
                           type="button"
                           onClick={() => {
-                            setLocationName(preset.name);
+                            setSelectedCity(preset.city);
+                            setSelectedCountry(preset.country);
+                            setLocationName(preset.city);
                             setUserLat(preset.lat);
                             setUserLng(preset.lng);
                             setStationCount(preset.count);
@@ -424,94 +398,41 @@ export default function Page() {
                   </div>
                 </div>
 
-
-
-                {/* Planning area selector dropdown */}
-
-                <div style={{ padding: "12px 22px 14px", borderTop: "1px solid var(--color-border-subtle)", display: "flex", flexDirection: "column", gap: "6px" }}>
-
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-
-                    <span style={{ fontFamily: "Times New Roman, serif", fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-ink-4)" }}>
-
-                      Select a Planning Area
-
-                    </span>
-
-                    {phase === "located" && (
-
-                      <span style={{ fontFamily: "Times New Roman, serif", fontSize: "11px", color: "var(--color-navy-600)" }}>
-
-                        Area centered
-
-                      </span>
-
-                    )}
-
-                  </div>
-
-                  <SearchBar
-
-                    selectedName={locationName}
-
-                    selectedLat={userLat}
-
-                    selectedLng={userLng}
-
-                    onLocationSelect={handleLocationSelect}
-
+                {/* Country and City Selector */}
+                <div style={{ padding: "14px 22px 14px", borderTop: "1px solid var(--color-border-subtle)" }}>
+                  <CountryCitySelector
+                    selectedCountry={selectedCountry}
+                    selectedCity={selectedCity}
+                    onCountrySelect={handleCountrySelect}
+                    onCitySelect={handleCitySelect}
                   />
-
                 </div>
 
-
-
                 <PlanningControls
-
                   stationCount={stationCount}
-
                   onStationCountChange={setStationCount}
-
                   scenario={scenario}
-
                   onScenarioChange={setScenario}
-
                 />
 
-
-
-                {/* Run analysis button */}
-
+                {/* Find Optimal Locations CTA button */}
                 <div style={{ padding: "14px 22px" }}>
-
                   <button
-
                     onClick={handleSearch}
-
                     style={{
-
-                      width: "100%", padding: "13px", borderRadius: "12px", border: "none",
-
+                      width: "100%", padding: "14px", borderRadius: "12px", border: "none",
                       background: "var(--color-navy-900)", color: "white",
-
-                      fontFamily: "Times New Roman, serif", fontSize: "15px", letterSpacing: "-0.005em",
-
+                      fontFamily: "Times New Roman, serif", fontSize: "15px", fontWeight: 600, letterSpacing: "-0.005em",
                       cursor: "pointer", transition: "opacity 0.2s ease, transform 0.15s ease",
-
                       boxShadow: "0 4px 16px rgba(10,22,40,0.22)",
-
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                     }}
-
                     onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.9"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-
                     onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-
                   >
-
-                    Run infrastructure analysis →
-
+                    <span>⚡ Find Optimal Locations</span>
+                    <span>→</span>
                   </button>
-
                 </div>
 
               </div>
@@ -643,9 +564,7 @@ export default function Page() {
             <div className="glass" style={{ borderRadius: "99px", padding: "7px 16px", boxShadow: "0 4px 20px rgba(10,22,40,0.1)", display: "flex", alignItems: "center", gap: "16px" }}>
 
               <span style={{ fontFamily: "Times New Roman, serif", fontSize: "12px", color: "var(--color-ink-3)", whiteSpace: "nowrap" }}>
-
-                8 candidate zones · Shenzhen
-
+                8 candidate deployment zones · {selectedCity}, {selectedCountry}
               </span>
 
             </div>

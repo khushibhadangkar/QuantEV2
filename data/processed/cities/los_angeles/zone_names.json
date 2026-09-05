@@ -1,0 +1,34 @@
+{
+  "Z0": {
+    "primary": "Downtown LA (DTLA) Financial Core",
+    "secondary": "Bunker Hill & Grand Ave"
+  },
+  "Z1": {
+    "primary": "Burbank / Glendale Media District",
+    "secondary": "San Fernando Valley Gateway"
+  },
+  "Z2": {
+    "primary": "Hollywood & Sunset Blvd Corridor",
+    "secondary": "Highland Ave Entertainment Hub"
+  },
+  "Z3": {
+    "primary": "Culver City & Arts District",
+    "secondary": "Washington Blvd Tech Hub"
+  },
+  "Z4": {
+    "primary": "Santa Monica & Silicon Beach",
+    "secondary": "Ocean Park & 4th St Promenade"
+  },
+  "Z5": {
+    "primary": "Pasadena & San Gabriel Gateway",
+    "secondary": "Colorado Blvd Commercial Core"
+  },
+  "Z6": {
+    "primary": "USC & Exposition Park Transit",
+    "secondary": "Figueroa Corridor Innovation Hub"
+  },
+  "Z7": {
+    "primary": "Century City & Westwood Corridor",
+    "secondary": "Wilshire Blvd Corporate Gateway"
+  }
+}

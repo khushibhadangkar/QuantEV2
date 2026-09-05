@@ -42,6 +42,10 @@ class OptimizeRequest(BaseModel):
     Parameters for the optimization run.  All fields are optional — omitting
     them applies the validated defaults from experiments/08.
     """
+    city: Optional[str] = Field(
+        default="San Francisco",
+        description="Target city name (e.g. Beijing, Mumbai, San Francisco, Los Angeles, Chicago).",
+    )
     station_count: int = Field(
         default=3,
         ge=1,
@@ -73,6 +77,7 @@ class OptimizeRequest(BaseModel):
     model_config = {
         "json_schema_extra": {
             "example": {
+                "city": "San Francisco",
                 "station_count": 3,
                 "scenario": "all_hours",
                 "reps": 1,
@@ -100,9 +105,16 @@ class ZoneDetail(BaseModel):
     self_demand_score: float
     proximity_spillover_score: float
     coverage_neighbors_count: int
+    infrastructure_gap_score: Optional[float] = None
+    predicted_cost_usd: Optional[float] = None
+    predicted_roi_years: Optional[float] = None
+    annual_revenue_usd: Optional[float] = None
+    key_reason: Optional[str] = None
 
 class RecommendationResponse(BaseModel):
     selected_zones: list[str]
+    city: Optional[str] = None
+    country: Optional[str] = None
     scenario: str = "all_hours"
     method: str
     qubo_energy: float
@@ -111,6 +123,9 @@ class RecommendationResponse(BaseModel):
     matches_qubo_optimum: bool
     predicted_demand: dict[str, float]
     total_candidate_demand_kwh_h: float
+    total_predicted_cost_usd: Optional[float] = None
+    total_annual_revenue_usd: Optional[float] = None
+    average_roi_years: Optional[float] = None
     zone_details: list[ZoneDetail]
 
 
@@ -245,6 +260,7 @@ async def run_optimize(request: OptimizeRequest) -> OptimizeResponse:
     )
     try:
         raw = svc.run_pipeline(
+            city=request.city,
             station_count=request.station_count,
             scenario=request.scenario,
             reps=request.reps,

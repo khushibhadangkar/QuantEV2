@@ -1,0 +1,34 @@
+{
+  "Z0": {
+    "primary": "Chaoyang Central CBD",
+    "secondary": "Guomao & Da Wang Rd Corridor"
+  },
+  "Z1": {
+    "primary": "Haidian Innovation Core",
+    "secondary": "Zhongguancun & University Zone"
+  },
+  "Z2": {
+    "primary": "Fengtai Transport Hub",
+    "secondary": "Beijing South Railway Corridor"
+  },
+  "Z3": {
+    "primary": "Shijingshan Tech Park",
+    "secondary": "West Chang'an Tech Valley"
+  },
+  "Z4": {
+    "primary": "Olympic Village & North Core",
+    "secondary": "Anzhen & Asian Games Hub"
+  },
+  "Z5": {
+    "primary": "Yizhuang High-Tech Base",
+    "secondary": "Economic Development Zone"
+  },
+  "Z6": {
+    "primary": "Dongcheng & Xicheng Core",
+    "secondary": "Financial Street & Commercial Center"
+  },
+  "Z7": {
+    "primary": "Haidian North & Shangdi",
+    "secondary": "Software Park Tech Corridor"
+  }
+}

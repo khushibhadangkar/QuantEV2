@@ -220,7 +220,7 @@ export function QuantumAdvantageModal({ isOpen, onClose }: QuantumAdvantageModal
                   The Judge Defense: Why Quantum?
                 </div>
                 <p style={{ fontFamily: "Times New Roman, serif", fontSize: "12px", color: "var(--color-navy-700)", lineHeight: 1.5, margin: 0 }}>
-                  In a toy benchmark of 8 zones with 3 stations, classical search easily tests 56 states in 2ms. But municipal infrastructure deployment across a real metropolitan area like Shenzhen (50–100 candidate zones) causes an <strong>O(N^K) classical explosion</strong>. Quantum QAOA maps the problem to a 2^N state Hamiltonian, exploring the entire state space simultaneously in superposition.
+                  In a benchmark cluster of 8 zones with 3 stations, classical search tests 56 states in milliseconds. But municipal infrastructure deployment across a full metropolitan area (50–100 candidate zones) causes an <strong>O(N^K) classical explosion</strong>. Quantum QAOA maps the problem to a 2^N state Hamiltonian, exploring the entire state space simultaneously in superposition.
                 </p>
               </div>
 
@@ -245,9 +245,9 @@ export function QuantumAdvantageModal({ isOpen, onClose }: QuantumAdvantageModal
                     style={{ width: "100%", accentColor: "var(--color-navy-900)", cursor: "pointer" }}
                   />
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "var(--color-ink-4)", marginTop: "4px" }}>
-                    <span>8 (Current MVP)</span>
-                    <span>50 (District Level)</span>
-                    <span>100 (Full City)</span>
+                    <span>8 (MVP)</span>
+                    <span>50</span>
+                    <span>100</span>
                   </div>
                 </div>
 
@@ -328,7 +328,7 @@ export function QuantumAdvantageModal({ isOpen, onClose }: QuantumAdvantageModal
                     { label: "District MVP (Current)", n_k: "N=8, K=3", states: "56", time: "0.0003 sec", viable: true },
                     { label: "Urban Sector", n_k: "N=30, K=8", states: "5,852,925", time: "~1.17 sec", viable: true },
                     { label: "Metropolitan Grid", n_k: "N=60, K=12", states: "1.58 × 10¹²", time: "~87 hours", viable: false },
-                    { label: "Shenzhen Megacity", n_k: "N=100, K=15", states: "2.53 × 10¹⁷", time: "~72,000 years", viable: false },
+                    { label: "Global Megacity", n_k: "N=100, K=15", states: "2.53 × 10¹⁷", time: "~72,000 years", viable: false },
                   ].map((row, i) => (
                     <div
                       key={row.label}

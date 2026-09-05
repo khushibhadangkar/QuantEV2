@@ -157,7 +157,7 @@ export function ExecutiveReportModal({
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
                 <div style={{ fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "#6b7282", marginBottom: "4px" }}>
-                  Shenzhen Transportation Commission · EV Infrastructure Taskforce
+                  Municipal Transportation Commission · EV Infrastructure Taskforce
                 </div>
                 <h1 style={{ fontSize: "24px", fontWeight: 600, margin: "0 0 4px", letterSpacing: "-0.02em" }}>
                   QuantEV Municipal Infrastructure Investment Brief
@@ -168,7 +168,7 @@ export function ExecutiveReportModal({
               </div>
               <div style={{ textAlign: "right" }}>
                 <div style={{ fontSize: "12px", color: "#6b7282" }}>Date: {currentDate}</div>
-                <div style={{ fontSize: "11px", color: "#6b7282", marginTop: "2px" }}>Doc Ref: QEV-SZ-{Date.now().toString().slice(-6)}</div>
+                <div style={{ fontSize: "11px", color: "#6b7282", marginTop: "2px" }}>Doc Ref: QEV-GLO-{Date.now().toString().slice(-6)}</div>
                 <div style={{ display: "inline-block", marginTop: "6px", padding: "2px 8px", background: "#eef5fc", border: "1px solid #c8cdd8", borderRadius: "4px", fontSize: "10px", color: "#162d58", fontWeight: 600 }}>
                   QUANTUM VERIFIED (QAOA)
                 </div>
@@ -182,7 +182,7 @@ export function ExecutiveReportModal({
               1. Executive Summary & Recommendation
             </h2>
             <p style={{ fontSize: "13px", lineHeight: 1.6, color: "#333849", margin: 0 }}>
-              Using high-resolution spatiotemporal taxi dispatch telemetry across Shenzhen, the QuantEV decision intelligence pipeline evaluated candidate deployment sites. Formulation as a Quadratic Unconstrained Binary Optimization (QUBO) problem identified the optimal <strong>{k}-station deployment layout</strong> that maximizes direct EV demand capture while preventing localized distribution grid overload through 3km proximity dispersion.
+              Using high-resolution spatiotemporal charging station and grid telemetry across {locationName}, the QuantEV decision intelligence pipeline evaluated candidate deployment sites. Formulation as a Quadratic Unconstrained Binary Optimization (QUBO) problem identified the optimal <strong>{k}-station deployment layout</strong> that maximizes direct EV demand capture while preventing localized distribution grid overload through 3km proximity dispersion.
             </p>
           </div>
 

@@ -1,0 +1,34 @@
+{
+  "Z0": {
+    "primary": "Financial District & Market St",
+    "secondary": "Embarcadero & Transit Center"
+  },
+  "Z1": {
+    "primary": "Presidio & Marina Gateway",
+    "secondary": "Lombard & Golden Gate Corridor"
+  },
+  "Z2": {
+    "primary": "Fisherman's Wharf & North Beach",
+    "secondary": "Columbus Ave Tourism Corridor"
+  },
+  "Z3": {
+    "primary": "Mission District & 24th St",
+    "secondary": "Valencia Commercial Corridor"
+  },
+  "Z4": {
+    "primary": "Sunset & Richmond Transit Hub",
+    "secondary": "19th Ave & Golden Gate Park"
+  },
+  "Z5": {
+    "primary": "SOMA & Mission Bay Tech Hub",
+    "secondary": "Chase Center & 4th St Transit"
+  },
+  "Z6": {
+    "primary": "Civic Center & Mid-Market",
+    "secondary": "City Hall & Van Ness Corridor"
+  },
+  "Z7": {
+    "primary": "Potrero Hill & Dogpatch",
+    "secondary": "3rd St Innovation Corridor"
+  }
+}

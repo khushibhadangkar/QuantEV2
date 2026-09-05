@@ -15,6 +15,7 @@ export type PlanningScenario =
   | "weekend";
 
 export interface OptimizeRequest {
+  city?: string;
   station_count?: number; // 1-8
   scenario?: PlanningScenario;
   reps?: number;   // 1–5, default 1
@@ -37,10 +38,17 @@ export interface ZoneDetail {
   self_demand_score: number;
   proximity_spillover_score: number;
   coverage_neighbors_count: number;
+  infrastructure_gap_score?: number;
+  predicted_cost_usd?: number;
+  predicted_roi_years?: number;
+  annual_revenue_usd?: number;
+  key_reason?: string;
 }
 
 export interface RecommendationResponse {
   selected_zones: string[];
+  city?: string;
+  country?: string;
   scenario?: string;
   method: string;
   qubo_energy: number;
@@ -49,6 +57,9 @@ export interface RecommendationResponse {
   matches_qubo_optimum: boolean;
   predicted_demand: Record<string, number>;
   total_candidate_demand_kwh_h: number;
+  total_predicted_cost_usd?: number;
+  total_annual_revenue_usd?: number;
+  average_roi_years?: number;
   zone_details: ZoneDetail[];
 }
 

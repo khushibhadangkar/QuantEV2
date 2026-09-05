@@ -1,0 +1,34 @@
+{
+  "Z0": {
+    "primary": "The Loop Central Financial Core",
+    "secondary": "State St & LaSalle Street Hub"
+  },
+  "Z1": {
+    "primary": "Lincoln Park & Lakefront Hub",
+    "secondary": "Clark St & North Side Corridor"
+  },
+  "Z2": {
+    "primary": "West Loop & Fulton Market",
+    "secondary": "Randolph St Innovation Corridor"
+  },
+  "Z3": {
+    "primary": "River North & Magnificent Mile",
+    "secondary": "Michigan Ave Retail Corridor"
+  },
+  "Z4": {
+    "primary": "South Loop & Museum Campus",
+    "secondary": "Roosevelt Rd Transit Gateway"
+  },
+  "Z5": {
+    "primary": "Wicker Park & Logan Square",
+    "secondary": "Milwaukee Ave Commercial Belt"
+  },
+  "Z6": {
+    "primary": "Lakeview & Wrigleyville Hub",
+    "secondary": "Belmont Ave Transit Interchange"
+  },
+  "Z7": {
+    "primary": "Hyde Park & University Campus",
+    "secondary": "55th St South Side Hub"
+  }
+}

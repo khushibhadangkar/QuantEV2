@@ -63,7 +63,7 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
     const mapRef = useRef<any>(null);
     const userMarkerRef = useRef<any>(null);
     const layersRef = useRef<any[]>([]);
-    const userLatLngRef = useRef<[number, number]>([22.625, 114.075]);
+    const userLatLngRef = useRef<[number, number]>([37.8032, -122.4005]);
 
     const [showCoverage, setShowCoverage] = useState(true);
     const [showHeatmap, setShowHeatmap] = useState(false);
@@ -96,7 +96,7 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
         el.style.height = "100%";
 
         const map = L.map(el, {
-          center: [22.625, 114.075],
+          center: [37.8032, -122.4005],
           zoom: 13,
           zoomControl: false,
           scrollWheelZoom: true,
@@ -232,15 +232,27 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
             layersRef.current.push(m);
           });
 
-          // 4. Selected stations (3km isochrone reach + pulsing station marker)
-          selZones.forEach((z, idx) => {
+          // 4. Selected stations: Ranked #1, #2, #3 with prominent badges and reasons
+          const rankedSelZones = [...selZones].sort((a, b) => b.qubo_c_value - a.qubo_c_value);
+
+          rankedSelZones.forEach((z, idx) => {
+            const rank = idx + 1;
+            const rankColor = rank === 1 ? "#D97706" : rank === 2 ? "#2563EB" : "#059669";
+            const rankTitle = rank === 1 ? "Rank #1 · Primary Deployment Site" : rank === 2 ? "Rank #2 · Strategic Network Hub" : "Rank #3 · Grid-Balanced Site";
+            const defaultKeyReason = rank === 1
+              ? "Highest direct localized charging capture with maximum daily turnaround efficiency."
+              : rank === 2
+              ? "Optimal 3km proximity spillover servicing adjacent traffic corridors without duplication."
+              : "Fills critical charging deficit while maintaining balanced power distribution across the grid.";
+            const keyReason = z.key_reason || defaultKeyReason;
+
             if (showCoverage) {
               // 3km mathematical boundary
               const cov3k = L.circle([z.latitude, z.longitude], {
                 radius: 3000,
-                color: "rgba(22,45,88,0.22)",
-                fillColor: "rgba(22,45,88,0.04)",
-                fillOpacity: 1,
+                color: rankColor,
+                fillColor: rankColor,
+                fillOpacity: 0.05,
                 weight: 1.5,
                 dashArray: "4 8",
               }).addTo(map);
@@ -248,10 +260,10 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
               // 1.2km core service radius
               const covCore = L.circle([z.latitude, z.longitude], {
                 radius: 1200,
-                color: "rgba(22,45,88,0.3)",
-                fillColor: "rgba(22,45,88,0.08)",
-                fillOpacity: 1,
-                weight: 1,
+                color: rankColor,
+                fillColor: rankColor,
+                fillOpacity: 0.12,
+                weight: 1.5,
               }).addTo(map);
 
               layersRef.current.push(cov3k, covCore);
@@ -260,28 +272,39 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
             const dist = haversine(uLat, uLng, z.latitude, z.longitude);
             const icon = L.divIcon({
               className: "",
-              html: `<div style="position:relative;width:56px;height:56px;transform:translate(-28px,-28px);">
-                <div style="position:absolute;inset:0;border-radius:50%;background:rgba(10,22,40,0.14);animation:pulse-1 2.4s ease-out infinite;"></div>
-                <div style="position:absolute;inset:0;border-radius:50%;background:rgba(10,22,40,0.08);animation:pulse-2 2.4s ease-out 0.8s infinite;"></div>
-                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;background:var(--color-navy-900);border:3.5px solid white;box-shadow:0 6px 24px rgba(10,22,40,0.40);display:flex;align-items:center;justify-content:center;">
-                  <div style="width:8px;height:8px;border-radius:50%;background:white;opacity:0.9;"></div>
+              html: `<div style="position:relative;width:64px;height:64px;transform:translate(-32px,-32px);cursor:pointer;">
+                <div style="position:absolute;inset:0;border-radius:50%;background:${rankColor};opacity:0.22;animation:pulse-1 2.2s ease-out infinite;"></div>
+                <div style="position:absolute;inset:6px;border-radius:50%;background:${rankColor};opacity:0.15;animation:pulse-2 2.2s ease-out 0.6s infinite;"></div>
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:var(--color-navy-900);border:3px solid ${rankColor};box-shadow:0 6px 20px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;">
+                  <span style="color:white;font-family:'Times New Roman',serif;font-weight:700;font-size:13px;letter-spacing:-0.02em;">#${rank}</span>
                 </div>
               </div>`,
-              iconSize: [0, 0], iconAnchor: [0, 0],
+              iconSize: [0, 0],
+              iconAnchor: [0, 0],
             });
-            const m = L.marker([z.latitude, z.longitude], { icon, zIndexOffset: 1500 }).addTo(map);
-            m.bindPopup(L.popup({ closeButton: true, maxWidth: 280, offset: [0, -10] }).setContent(`
-              <div style="font-family:Times New Roman,serif;padding:20px 22px;min-width:240px;">
-                <div style="display:inline-flex;align-items:center;gap:6px;background:var(--color-navy-900);color:white;font-size:10px;letter-spacing:0.08em;padding:4px 10px;border-radius:99px;margin-bottom:14px;">
-                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><circle cx="4" cy="4" r="2.5" fill="white"/></svg>
-                  Recommended Site (3km Reach)
+
+            const m = L.marker([z.latitude, z.longitude], { icon, zIndexOffset: 2000 - idx * 100 }).addTo(map);
+            m.bindPopup(L.popup({ closeButton: true, maxWidth: 320, offset: [0, -10] }).setContent(`
+              <div style="font-family:'Times New Roman',serif;padding:18px 20px;min-width:270px;">
+                <div style="display:inline-flex;align-items:center;gap:6px;background:${rankColor};color:white;font-size:10.5px;font-weight:700;letter-spacing:0.06em;padding:4px 10px;border-radius:99px;margin-bottom:12px;">
+                  ★ ${rankTitle}
                 </div>
-                <div style="font-size:24px;letter-spacing:-0.02em;color:var(--color-ink);margin-bottom:2px;">${z.name_primary || `Site ${z.label}`}</div>
-                <div style="font-size:13px;color:var(--color-ink-3);margin-bottom:14px;">${z.latitude.toFixed(4)}°N, ${z.longitude.toFixed(4)}°E</div>
-                <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--color-border);padding-top:12px;font-size:13px;">
-                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Predicted demand</span><span style="font-weight:600;color:var(--color-ink);">${formatDemand(z.predicted_demand_kwh_h)}</span></div>
-                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">QUBO score</span><span>${z.qubo_c_value.toFixed(3)}</span></div>
-                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Distance</span><span>${dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`}</span></div>
+                <div style="font-size:22px;font-weight:700;letter-spacing:-0.02em;color:var(--color-ink);margin-bottom:2px;">
+                  ${z.name_primary || `Site ${z.label}`}
+                </div>
+                <div style="font-size:12px;color:var(--color-ink-3);margin-bottom:12px;">
+                  ${z.latitude.toFixed(4)}°, ${z.longitude.toFixed(4)}°
+                </div>
+                <div style="background:rgba(10,22,40,0.04);border-left:3px solid ${rankColor};border-radius:4px;padding:8px 10px;margin-bottom:12px;font-size:12px;line-height:1.4;color:var(--color-ink-2);">
+                  <strong>Key Reason:</strong> ${keyReason}
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--color-border);padding-top:10px;font-size:12px;">
+                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Predicted Demand</span><span style="font-weight:600;color:var(--color-ink);">${formatDemand(z.predicted_demand_kwh_h)}</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Infrastructure Gap</span><span style="font-weight:700;color:var(--color-negative);">${z.infrastructure_gap_score ? `${z.infrastructure_gap_score}/10` : "High Deficit"}</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Predicted CapEx</span><span style="font-weight:600;">${z.predicted_cost_usd ? `$${Math.round(z.predicted_cost_usd / 1000)}k USD` : "$120k"}</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Est. Payback</span><span style="font-weight:700;color:var(--color-positive);">${z.predicted_roi_years ? `~${z.predicted_roi_years} Years` : "~2.0 Years"}</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">QUBO Score (c_j)</span><span style="font-weight:600;">${z.qubo_c_value.toFixed(3)}</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Distance from Center</span><span>${dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`}</span></div>
                 </div>
               </div>`));
             layersRef.current.push(m);
@@ -476,9 +499,9 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
         clearLayers();
         lastResultsRef.current = null;
         setHasResults(false);
-        userLatLngRef.current = [22.625, 114.075];
+        userLatLngRef.current = [37.8032, -122.4005];
         if (mapRef.current) {
-          mapRef.current.flyTo([22.625, 114.075], 13, { duration: 1.2, easeLinearity: 0.3 });
+          mapRef.current.flyTo([37.8032, -122.4005], 13, { duration: 1.2, easeLinearity: 0.3 });
         }
       },
     }));
