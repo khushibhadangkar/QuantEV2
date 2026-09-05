@@ -16,7 +16,6 @@ export interface ChargingMapHandle {
   showResults: (zones: ZoneDetail[], selected: string[]) => void;
   showScenario: (zones: ZoneDetail[], selected: string[], k: number) => void;
   resetToIdle: () => void;
-  focusZone: (lat: number, lng: number) => void;
 }
 
 interface ChargingMapProps {
@@ -64,7 +63,7 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
     const mapRef = useRef<any>(null);
     const userMarkerRef = useRef<any>(null);
     const layersRef = useRef<any[]>([]);
-    const userLatLngRef = useRef<[number, number]>([19.0467, 72.8911]);
+    const userLatLngRef = useRef<[number, number]>([37.8032, -122.4005]);
 
     const [showCoverage, setShowCoverage] = useState(true);
     const [showHeatmap, setShowHeatmap] = useState(false);
@@ -275,20 +274,11 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
             const dist = haversine(uLat, uLng, z.latitude, z.longitude);
             const icon = L.divIcon({
               className: "",
-              html: `<div style="position:relative;width:240px;height:74px;transform:translate(-120px,-48px);pointer-events:none;cursor:pointer;">
-                <!-- Permanent Floating Name Pill -->
-                <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.96);border:2px solid ${rankColor};border-radius:24px;padding:3px 10px;box-shadow:0 6px 18px rgba(10,22,40,0.22);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;pointer-events:auto;">
-                  <span style="background:${rankColor};color:white;font-family:'Times New Roman',serif;font-weight:700;font-size:11px;padding:1px 6px;border-radius:99px;box-shadow:0 2px 6px ${rankColor}44;">★ #${rank}</span>
-                  <span style="font-family:'Times New Roman',serif;font-weight:700;font-size:12px;color:var(--color-ink);letter-spacing:-0.01em;">${z.name_primary || `Site ${z.label}`}</span>
-                  <span style="font-size:11px;color:var(--color-ink-3);font-weight:600;">${formatDemand(z.predicted_demand_kwh_h)}</span>
-                </div>
-                <!-- Pin Base -->
-                <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:46px;height:46px;pointer-events:auto;">
-                  <div style="position:absolute;inset:0;border-radius:50%;background:${rankColor};opacity:0.25;animation:pulse-1 2.2s ease-out infinite;"></div>
-                  <div style="position:absolute;inset:5px;border-radius:50%;background:${rankColor};opacity:0.18;animation:pulse-2 2.2s ease-out 0.6s infinite;"></div>
-                  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:var(--color-navy-900);border:3px solid ${rankColor};box-shadow:0 4px 16px rgba(0,0,0,0.38);display:flex;align-items:center;justify-content:center;">
-                    <span style="color:white;font-family:'Times New Roman',serif;font-weight:700;font-size:12px;">#${rank}</span>
-                  </div>
+              html: `<div style="position:relative;width:64px;height:64px;transform:translate(-32px,-32px);cursor:pointer;">
+                <div style="position:absolute;inset:0;border-radius:50%;background:${rankColor};opacity:0.22;animation:pulse-1 2.2s ease-out infinite;"></div>
+                <div style="position:absolute;inset:6px;border-radius:50%;background:${rankColor};opacity:0.15;animation:pulse-2 2.2s ease-out 0.6s infinite;"></div>
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:var(--color-navy-900);border:3px solid ${rankColor};box-shadow:0 6px 20px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;">
+                  <span style="color:white;font-family:'Times New Roman',serif;font-weight:700;font-size:13px;letter-spacing:-0.02em;">#${rank}</span>
                 </div>
               </div>`,
               iconSize: [0, 0],
@@ -296,39 +286,43 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
             });
 
             const m = L.marker([z.latitude, z.longitude], { icon, zIndexOffset: 2000 - idx * 100 }).addTo(map);
-            m.bindPopup(L.popup({ closeButton: true, maxWidth: 300, offset: [0, -32] }).setContent(`
-              <div style="font-family:'Times New Roman',serif;padding:14px 16px;min-width:240px;">
-                <div style="display:inline-flex;align-items:center;gap:6px;background:${rankColor};color:white;font-size:10px;font-weight:700;letter-spacing:0.04em;padding:3px 8px;border-radius:99px;margin-bottom:8px;">
+            m.bindPopup(L.popup({ closeButton: true, maxWidth: 320, offset: [0, -10] }).setContent(`
+              <div style="font-family:'Times New Roman',serif;padding:18px 20px;min-width:270px;">
+                <div style="display:inline-flex;align-items:center;gap:6px;background:${rankColor};color:white;font-size:10.5px;font-weight:700;letter-spacing:0.06em;padding:4px 10px;border-radius:99px;margin-bottom:12px;">
                   ★ ${rankTitle}
                 </div>
-                <div style="font-size:18px;font-weight:700;letter-spacing:-0.015em;color:var(--color-ink);margin-bottom:2px;line-height:1.2;">
+                <div style="font-size:22px;font-weight:700;letter-spacing:-0.02em;color:var(--color-ink);margin-bottom:2px;">
                   ${z.name_primary || `Site ${z.label}`}
                 </div>
-                <div style="font-size:11px;color:var(--color-ink-3);margin-bottom:8px;">
-                  ${z.name_secondary ? `${z.name_secondary} · ` : ""}${z.latitude.toFixed(4)}°, ${z.longitude.toFixed(4)}°
+                <div style="font-size:12px;color:var(--color-ink-3);margin-bottom:12px;">
+                  ${z.latitude.toFixed(4)}°, ${z.longitude.toFixed(4)}°
                 </div>
-                <div style="background:rgba(10,22,40,0.04);border-left:3px solid ${rankColor};border-radius:4px;padding:6px 8px;margin-bottom:10px;font-size:11.5px;line-height:1.35;color:var(--color-ink-2);">
+                <div style="background:rgba(10,22,40,0.04);border-left:3px solid ${rankColor};border-radius:4px;padding:8px 10px;margin-bottom:12px;font-size:12px;line-height:1.4;color:var(--color-ink-2);">
                   <strong>Key Reason:</strong> ${keyReason}
                 </div>
-                <div style="display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--color-border);padding-top:8px;font-size:11px;">
+                <div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--color-border);padding-top:10px;font-size:12px;">
                   <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Predicted Demand</span><span style="font-weight:600;color:var(--color-ink);">${formatDemand(z.predicted_demand_kwh_h)}</span></div>
-                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Infrastructure Gap</span><span style="font-weight:700;color:var(--color-negative);">${z.infrastructure_gap_score ? `${z.infrastructure_gap_score}/10 Deficit` : "High Deficit"}</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Infrastructure Gap</span><span style="font-weight:700;color:var(--color-negative);">${z.infrastructure_gap_score ? `${z.infrastructure_gap_score}/10` : "High Deficit"}</span></div>
                   <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Predicted CapEx</span><span style="font-weight:600;">${z.predicted_cost_usd ? `$${Math.round(z.predicted_cost_usd / 1000)}k USD` : "$120k"}</span></div>
-                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Est. Payback</span><span style="font-weight:700;color:var(--color-positive);">${z.predicted_roi_years ? `~${z.predicted_roi_years} Years` : "~0.6 Years"}</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Est. Payback</span><span style="font-weight:700;color:var(--color-positive);">${z.predicted_roi_years ? `~${z.predicted_roi_years} Years` : "~2.0 Years"}</span></div>
                   <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">QUBO Score (c_j)</span><span style="font-weight:600;">${z.qubo_c_value.toFixed(3)}</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Distance from Center</span><span>${dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`}</span></div>
                 </div>
               </div>`));
             layersRef.current.push(m);
+
+            if (isNew && idx === 0) {
+              setTimeout(() => m.openPopup(), 600);
+            }
           });
 
-          // Zoom & frame ONLY the 3 selected areas (tight city frame)
           if (isNew && selZones.length > 0) {
-            const pts: [number, number][] = selZones.map((z) => [z.latitude, z.longitude] as [number, number]);
-            const bounds = L.latLngBounds(pts).pad(0.35);
-            map.flyToBounds(bounds, {
-              duration: 0.9,
-              easeLinearity: 0.22,
-              maxZoom: 13,
+            const pts: [number, number][] = [
+              ...selZones.map((z) => [z.latitude, z.longitude] as [number, number]),
+              userLatLngRef.current,
+            ];
+            map.flyToBounds(L.latLngBounds(pts).pad(0.25), {
+              duration: 0.9, easeLinearity: 0.22,
             });
           }
         });
@@ -346,7 +340,6 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
     useImperativeHandle(ref, () => ({
 
       setUserLocation(lat: number, lng: number) {
-        userLatLngRef.current = [lat, lng];
         if (!mapRef.current) return;
         clearLayers();
         lastResultsRef.current = null;
@@ -354,6 +347,7 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
         import("leaflet").then(({ default: L }) => {
           const map = mapRef.current;
           if (!map) return;
+          userLatLngRef.current = [lat, lng];
           if (userMarkerRef.current) { userMarkerRef.current.remove(); userMarkerRef.current = null; }
           const icon = L.divIcon({
             className: "",
@@ -366,7 +360,7 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
             iconSize: [0, 0], iconAnchor: [0, 0],
           });
           userMarkerRef.current = L.marker([lat, lng], { icon, zIndexOffset: 2000 }).addTo(map);
-          map.flyTo([lat, lng], 12, { duration: 0.9, easeLinearity: 0.25 });
+          map.flyTo([lat, lng], 12.5, { duration: 1.0, easeLinearity: 0.25 });
         });
       },
 
