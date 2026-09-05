@@ -1,0 +1,34 @@
+{
+  "Z0": {
+    "primary": "Huawei Tech Campus",
+    "secondary": "Shantangpai & Longjingao Rd"
+  },
+  "Z1": {
+    "primary": "Wuhe Commercial Hub",
+    "secondary": "Daguangkan & Yongxiang Rd"
+  },
+  "Z2": {
+    "primary": "Yulong / Meiguan Gateway",
+    "secondary": "Jigongshan South Corridor"
+  },
+  "Z3": {
+    "primary": "Jihua / Cuifeng Center",
+    "secondary": "Cuifeng Haoyuan & Buji Border"
+  },
+  "Z4": {
+    "primary": "Bantian Station Plaza",
+    "secondary": "Lishipai & Changfa Middle Rd"
+  },
+  "Z5": {
+    "primary": "Guangyayuan Hub",
+    "secondary": "Guangyayuan Village & Metro"
+  },
+  "Z6": {
+    "primary": "Tian'an Cloud Park / Xuexiang",
+    "secondary": "Jiaxian Rd & Tech Valley"
+  },
+  "Z7": {
+    "primary": "Shangxue Innovation Park",
+    "secondary": "Shangxue & Zhujing Industrial Zone"
+  }
+}

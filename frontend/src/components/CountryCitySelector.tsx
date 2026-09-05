@@ -13,12 +13,21 @@ export interface GlobalCityOption {
 }
 
 export const SUPPORTED_COUNTRIES: { name: string; flag: string; cities: string[] }[] = [
-  { name: "China", flag: "🇨🇳", cities: ["Beijing"] },
+  { name: "China", flag: "🇨🇳", cities: ["Shenzhen"] },
   { name: "India", flag: "🇮🇳", cities: ["Mumbai"] },
   { name: "United States", flag: "🇺🇸", cities: ["San Francisco", "Los Angeles", "Chicago"] },
 ];
 
 export const CITY_CONFIGS: Record<string, GlobalCityOption> = {
+  "Shenzhen": {
+    city: "Shenzhen",
+    country: "China",
+    lat: 22.6349,
+    lng: 114.0808,
+    zoom: 13,
+    desc: "Shenzhen Mobility & Tech Corridor · 8 Candidate TAZ Planning Zones",
+    flag: "🇨🇳",
+  },
   "Beijing": {
     city: "Beijing",
     country: "China",
@@ -208,7 +217,7 @@ export function CountryCitySelector({
             })}
           </div>
         ) : (
-          // Single available city (e.g. Beijing for China, Mumbai for India)
+          // Single available city (e.g. Shenzhen for China, Mumbai for India)
           <div
             style={{
               display: "flex",

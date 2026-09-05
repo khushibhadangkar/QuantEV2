@@ -578,25 +578,26 @@ def run_pipeline(
         recommendation
     """
     t_total = time.perf_counter()
+    target_city = city or "Shenzhen"
 
-    if city:
+    if target_city:
         from backend.data.city_manager import get_city_manager, SCENARIO_MULTIPLIERS
         from backend.data.loader import filter_stations_by_city
 
         # ── STAGE 1: Real Station Data Ingestion ─────────────────────────────
-        log.info("[STAGE 1/7: REAL DATA INGESTION] Loading real charging stations for %s from global CSV...", city)
-        raw_stations = filter_stations_by_city(city)
+        log.info("[STAGE 1/7: REAL DATA INGESTION] Loading real charging stations for %s...", target_city)
+        raw_stations = filter_stations_by_city(target_city)
         n_raw = len(raw_stations)
         tot_users = float(raw_stations["usage_stats_users_per_day"].sum()) if "usage_stats_users_per_day" in raw_stations else 0
         avg_cap = float(raw_stations["charging_capacity_kw"].mean()) if "charging_capacity_kw" in raw_stations else 0
         log.info(
             "[STAGE 1/7: REAL DATA INGESTION] Successfully loaded %d stations for %s. Total Daily Users: %d, Avg Capacity: %.1f kW.",
-            n_raw, city, int(tot_users), avg_cap
+            n_raw, target_city, int(tot_users), avg_cap
         )
 
         # ── STAGE 2: Spatial Clustering & AOI Generation ─────────────────────
         log.info("[STAGE 2/7: SPATIAL CLUSTERING & AOI GENERATION] Clustering stations into 8 candidate zones (AOIs)...")
-        bundle = get_city_manager().get_city_bundle(city)
+        bundle = get_city_manager().get_city_bundle(target_city)
         zones_df = bundle.zones_df.copy()
         log.info(
             "[STAGE 2/7: SPATIAL CLUSTERING & AOI GENERATION] 8 AOIs resolved for %s around center (%.4f, %.4f).",
@@ -604,27 +605,32 @@ def run_pipeline(
         )
 
         # ── STAGE 3: Infrastructure Gap & Demand Scoring ─────────────────────
-        mult = SCENARIO_MULTIPLIERS.get(scenario, 1.0)
-        demand_by_label = {
-            r["label"]: round(float(r["mean_pred_kwh"]) * mult, 2)
-            for _, r in zones_df.iterrows()
-        }
-        zones_df["mean_pred_kwh"] = [demand_by_label[lbl] for lbl in zones_df["label"]]
-        log.info(
-            "[STAGE 3/7: INFRASTRUCTURE GAP & DEMAND SCORING] Scenario '%s' (multiplier=%.2f). Hourly demand range: %.1f - %.1f kWh/h.",
-            scenario, mult, min(demand_by_label.values()), max(demand_by_label.values())
-        )
+        if bundle.city == "Shenzhen":
+            log.info("[STAGE 3/7: SHENZHEN REAL AI DEMAND] Running trained RandomForest on Shenzhen mobility telemetry (scenario=%s)...", scenario)
+            demand_by_label, ai_meta = _predict_demand(scenario=scenario)
+            zones_df["mean_pred_kwh"] = [demand_by_label[lbl] for lbl in zones_df["label"]]
+        else:
+            mult = SCENARIO_MULTIPLIERS.get(scenario, 1.0)
+            demand_by_label = {
+                r["label"]: round(float(r["mean_pred_kwh"]) * mult, 2)
+                for _, r in zones_df.iterrows()
+            }
+            zones_df["mean_pred_kwh"] = [demand_by_label[lbl] for lbl in zones_df["label"]]
+            log.info(
+                "[STAGE 3/7: INFRASTRUCTURE GAP & DEMAND SCORING] Scenario '%s' (multiplier=%.2f). Hourly demand range: %.1f - %.1f kWh/h.",
+                scenario, mult, min(demand_by_label.values()), max(demand_by_label.values())
+            )
 
-        ai_meta = {
-            "model": "GlobalDemandPredictor (Station Density + Deficit)",
-            "scenario": scenario,
-            "test_r2": 0.884,
-            "test_mae": 14.2,
-            "test_split_start": "2024-01-01",
-            "test_split_end": "2024-12-31",
-            "prediction_time_ms": 1.2,
-            "predicted_demand": demand_by_label,
-        }
+            ai_meta = {
+                "model": "GlobalDemandPredictor (Station Density + Deficit)",
+                "scenario": scenario,
+                "test_r2": 0.884,
+                "test_mae": 14.2,
+                "test_split_start": "2024-01-01",
+                "test_split_end": "2024-12-31",
+                "prediction_time_ms": 1.2,
+                "predicted_demand": demand_by_label,
+            }
 
         # ── STAGE 4: Distance & Adjacency Matrices ───────────────────────────
         log.info(
@@ -707,14 +713,28 @@ def run_pipeline(
             proximity_spillover_score = c_j - self_demand_score
             coverage_neighbors_count = int(qubo.coverage_adj[idx].sum()) - 1
 
-            # Rich metrics
-            infra_gap = float(row["infrastructure_gap_score"]) if "infrastructure_gap_score" in row else 7.0
-            pred_cost = float(row["predicted_cost_usd"]) if "predicted_cost_usd" in row else 135000.0
-            pred_roi = float(row["predicted_roi_years"]) if "predicted_roi_years" in row else 1.5
-            ann_rev = float(row["annual_revenue_usd"]) if "annual_revenue_usd" in row else 85000.0
-            key_reason = str(row["key_reason"]) if "key_reason" in row else (
+            # Rich metrics & existing station presence
+            infra_gap = float(row["infrastructure_gap_score"]) if "infrastructure_gap_score" in row and pd.notna(row["infrastructure_gap_score"]) else 7.0
+            pred_cost = float(row["predicted_cost_usd"]) if "predicted_cost_usd" in row and pd.notna(row["predicted_cost_usd"]) else 135000.0
+            pred_roi = float(row["predicted_roi_years"]) if "predicted_roi_years" in row and pd.notna(row["predicted_roi_years"]) else 1.5
+            ann_rev = float(row["annual_revenue_usd"]) if "annual_revenue_usd" in row and pd.notna(row["annual_revenue_usd"]) else 85000.0
+
+            charge_count = int(row["charge_count"]) if "charge_count" in row and pd.notna(row["charge_count"]) else 0
+            has_existing = charge_count > 0
+            existing_desc = (
+                f"Area already has an active EV charging station ({charge_count} operational bays)"
+                if has_existing
+                else "No existing charging stations (Greenfield deployment site)"
+            )
+
+            raw_key_reason = str(row["key_reason"]) if "key_reason" in row and pd.notna(row["key_reason"]) else (
                 f"Infrastructure Deficit Gap {infra_gap}/10. High daily EV charging congestion."
             )
+            # Explicitly highlight whether the area already has an electric charging station
+            if has_existing:
+                key_reason = f"⚡ Area already has an electric charging station ({charge_count} active bays). {raw_key_reason}"
+            else:
+                key_reason = f"🟢 Greenfield Site (No existing charging stations). {raw_key_reason}"
 
             is_selected = lbl in rec_zones
             if is_selected:
@@ -740,6 +760,9 @@ def run_pipeline(
                 "predicted_roi_years": round(pred_roi, 1),
                 "annual_revenue_usd": round(ann_rev, 2),
                 "key_reason": key_reason,
+                "has_existing_station": has_existing,
+                "existing_station_count": charge_count,
+                "existing_station_desc": existing_desc,
             })
 
         avg_roi = round(sum(roi_list) / max(1, len(roi_list)), 1)
@@ -843,6 +866,19 @@ def run_pipeline(
         proximity_spillover_score = c_j - self_demand_score
         coverage_neighbors_count = int(qubo.coverage_adj[idx].sum()) - 1
 
+        charge_count = int(row["charge_count"]) if "charge_count" in row and pd.notna(row["charge_count"]) else 0
+        has_existing = charge_count > 0
+        existing_desc = (
+            f"Area already has an active EV charging station ({charge_count} operational bays)"
+            if has_existing
+            else "No existing charging stations (Greenfield deployment site)"
+        )
+        key_reason = (
+            f"⚡ Area already has an electric charging station ({charge_count} active bays). High daily demand captures critical relief."
+            if has_existing
+            else "🟢 Greenfield Site (No existing charging stations)."
+        )
+
         zone_details.append({
             "label":           lbl,
             "tazid":           int(row["tazid"]),
@@ -856,6 +892,10 @@ def run_pipeline(
             "self_demand_score": round(self_demand_score, 6),
             "proximity_spillover_score": round(proximity_spillover_score, 6),
             "coverage_neighbors_count": coverage_neighbors_count,
+            "has_existing_station": has_existing,
+            "existing_station_count": charge_count,
+            "existing_station_desc": existing_desc,
+            "key_reason": key_reason,
         })
 
     pipeline_runtime = round(time.perf_counter() - t_total, 3)

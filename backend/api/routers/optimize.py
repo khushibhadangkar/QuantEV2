@@ -44,7 +44,7 @@ class OptimizeRequest(BaseModel):
     """
     city: Optional[str] = Field(
         default="San Francisco",
-        description="Target city name (e.g. Beijing, Mumbai, San Francisco, Los Angeles, Chicago).",
+        description="Target city name (e.g. Shenzhen, Mumbai, San Francisco, Los Angeles, Chicago).",
     )
     station_count: int = Field(
         default=3,
@@ -110,6 +110,9 @@ class ZoneDetail(BaseModel):
     predicted_roi_years: Optional[float] = None
     annual_revenue_usd: Optional[float] = None
     key_reason: Optional[str] = None
+    has_existing_station: bool = False
+    existing_station_count: int = 0
+    existing_station_desc: Optional[str] = None
 
 class RecommendedLocation(ZoneDetail):
     rank: int

@@ -251,6 +251,29 @@ export function ResultPanel({
                       <div style={{ fontFamily: "Times New Roman, serif", fontSize: "12px", color: "var(--color-ink-3)" }}>
                         {zone.name_secondary ? `${zone.name_secondary} · ` : ""}<span className="numeric">{formatDist(dist)}</span> from center
                       </div>
+                      <div style={{ marginTop: "6px", display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                        {(zone.has_existing_station || (zone.existing_station_count ?? 0) > 0) ? (
+                          <span style={{
+                            display: "inline-flex", alignItems: "center", gap: "4px",
+                            background: "rgba(30, 61, 117, 0.08)", color: "var(--color-navy-900)",
+                            border: "1px solid rgba(30, 61, 117, 0.22)",
+                            padding: "2px 8px", borderRadius: "6px",
+                            fontSize: "11px", fontWeight: 600, fontFamily: "Times New Roman, serif",
+                          }}>
+                            ⚡ Area Already Has EV Charging Station ({zone.existing_station_count} Active Bays)
+                          </span>
+                        ) : (
+                          <span style={{
+                            display: "inline-flex", alignItems: "center", gap: "4px",
+                            background: "rgba(16, 185, 129, 0.08)", color: "#065f46",
+                            border: "1px solid rgba(16, 185, 129, 0.22)",
+                            padding: "2px 8px", borderRadius: "6px",
+                            fontSize: "11px", fontWeight: 600, fontFamily: "Times New Roman, serif",
+                          }}>
+                            🟢 Greenfield Site (No Existing Charging Stations)
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -291,11 +314,17 @@ export function ResultPanel({
                   </div>
 
                   {isSelected && (
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", background: "rgba(10,22,40,0.03)", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--color-border-subtle)" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", background: "rgba(10,22,40,0.03)", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--color-border-subtle)" }}>
                       <div>
                         <div style={{ fontFamily: "Times New Roman, serif", fontSize: "10px", color: "var(--color-ink-4)", marginBottom: "1px" }}>Infrastructure Gap</div>
                         <div className="numeric" style={{ fontSize: "12px", fontWeight: 700, color: "var(--color-negative)" }}>
                           {zone.infrastructure_gap_score ? `${zone.infrastructure_gap_score}/10 Deficit` : "High Deficit"}
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontFamily: "Times New Roman, serif", fontSize: "10px", color: "var(--color-ink-4)", marginBottom: "1px" }}>Existing Station</div>
+                        <div className="numeric" style={{ fontSize: "12px", fontWeight: 700, color: (zone.has_existing_station || (zone.existing_station_count ?? 0) > 0) ? "var(--color-navy-800)" : "var(--color-ink-3)" }}>
+                          {(zone.has_existing_station || (zone.existing_station_count ?? 0) > 0) ? `Yes (${zone.existing_station_count} Bays)` : "None (Greenfield)"}
                         </div>
                       </div>
                       <div>

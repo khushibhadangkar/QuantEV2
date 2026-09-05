@@ -28,6 +28,16 @@ _PROCESSED_CITIES_DIR = _PROJECT_ROOT / "data" / "processed" / "cities"
 
 # Curated authentic district/landmark names for the 8 clusters in each city
 CITY_DISTRICT_NAMES: Dict[str, Dict[str, Dict[str, str]]] = {
+    "Shenzhen": {
+        "Z0": {"primary": "Huawei Tech Campus", "secondary": "Shantangpai & Longjingao Rd"},
+        "Z1": {"primary": "Wuhe Commercial Hub", "secondary": "Daguangkan & Yongxiang Rd"},
+        "Z2": {"primary": "Yulong / Meiguan Gateway", "secondary": "Jigongshan South Corridor"},
+        "Z3": {"primary": "Jihua / Cuifeng Center", "secondary": "Cuifeng Haoyuan & Buji Border"},
+        "Z4": {"primary": "Bantian Station Plaza", "secondary": "Lishipai & Changfa Middle Rd"},
+        "Z5": {"primary": "Guangyayuan Hub", "secondary": "Guangyayuan Village & Metro"},
+        "Z6": {"primary": "Tian'an Cloud Park / Xuexiang", "secondary": "Jiaxian Rd & Tech Valley"},
+        "Z7": {"primary": "Shangxue Innovation Park", "secondary": "Shangxue & Zhujing Industrial Zone"},
+    },
     "Beijing": {
         "Z0": {"primary": "Chaoyang Central CBD", "secondary": "Guomao & Da Wang Rd Corridor"},
         "Z1": {"primary": "Haidian Innovation Core", "secondary": "Zhongguancun & University Zone"},
@@ -126,7 +136,19 @@ class CityManager:
 
         # Preload all supported cities into memory at initialization
         # (Must happen before any Qiskit C-extension imports)
-        for city in ["Beijing", "Mumbai", "San Francisco", "Los Angeles", "Chicago"]:
+        try:
+            from backend.data.loader import get_loader
+            loader = get_loader()
+            loader.load_data()
+            for city in ["Shenzhen", "Mumbai", "San Francisco", "Los Angeles", "Chicago"]:
+                try:
+                    loader.filter_by_city(city)
+                except Exception:
+                    pass
+        except Exception as e:
+            log.warning("Could not preload raw loader data: %s", e)
+
+        for city in ["Shenzhen", "Mumbai", "San Francisco", "Los Angeles", "Chicago"]:
             try:
                 self.get_city_bundle(city)
             except Exception as e:

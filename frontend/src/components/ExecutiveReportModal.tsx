@@ -196,6 +196,7 @@ export function ExecutiveReportModal({
                 <tr style={{ background: "#f8f9fb", borderBottom: "1.5px solid #0a1628", textAlign: "left" }}>
                   <th style={{ padding: "8px 10px" }}>Site Priority</th>
                   <th style={{ padding: "8px 10px" }}>Location & District</th>
+                  <th style={{ padding: "8px 10px" }}>Existing Stations</th>
                   <th style={{ padding: "8px 10px" }}>Coordinates</th>
                   <th style={{ padding: "8px 10px", textAlign: "right" }}>Forecasted Demand</th>
                   <th style={{ padding: "8px 10px", textAlign: "right" }}>QUBO Objective Score</th>
@@ -210,6 +211,17 @@ export function ExecutiveReportModal({
                       <td style={{ padding: "10px" }}>
                         <div style={{ fontWeight: 600 }}>{zone.name_primary || `Zone ${zone.label}`}</div>
                         <div style={{ fontSize: "11px", color: "#6b7282" }}>{zone.name_secondary}</div>
+                      </td>
+                      <td style={{ padding: "10px" }}>
+                        {(zone.has_existing_station || (zone.existing_station_count ?? 0) > 0) ? (
+                          <span style={{ fontSize: "11px", color: "#1e3d75", fontWeight: 600, background: "#edf2fa", padding: "3px 7px", borderRadius: "4px" }}>
+                            ⚡ Yes ({zone.existing_station_count} Bays)
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: "11px", color: "#065f46", fontWeight: 600, background: "#ecfdf5", padding: "3px 7px", borderRadius: "4px" }}>
+                            🟢 Greenfield (0 Bays)
+                          </span>
+                        )}
                       </td>
                       <td style={{ padding: "10px", fontFamily: "monospace", fontSize: "11px" }}>
                         {zone.latitude.toFixed(4)}°N, {zone.longitude.toFixed(4)}°E

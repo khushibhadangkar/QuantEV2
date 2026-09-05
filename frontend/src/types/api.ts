@@ -43,6 +43,9 @@ export interface ZoneDetail {
   predicted_roi_years?: number;
   annual_revenue_usd?: number;
   key_reason?: string;
+  has_existing_station?: boolean;
+  existing_station_count?: number;
+  existing_station_desc?: string;
 }
 
 export interface RecommendedLocation extends ZoneDetail {

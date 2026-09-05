@@ -348,7 +348,7 @@ export default function Page() {
                     <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                       {[
                         { label: "🇺🇸 San Francisco", city: "San Francisco", country: "United States", lat: 37.8032, lng: -122.4005, count: 3, scen: "morning_peak" as const },
-                        { label: "🇨🇳 Beijing", city: "Beijing", country: "China", lat: 39.9096, lng: 116.3445, count: 3, scen: "afternoon" as const },
+                        { label: "🇨🇳 Shenzhen", city: "Shenzhen", country: "China", lat: 22.6349, lng: 114.0808, count: 3, scen: "afternoon" as const },
                         { label: "🇮🇳 Mumbai", city: "Mumbai", country: "India", lat: 19.0467, lng: 72.8911, count: 3, scen: "all_hours" as const },
                         { label: "🇺🇸 Chicago", city: "Chicago", country: "United States", lat: 41.9003, lng: -87.7022, count: 3, scen: "weekday" as const },
                         { label: "🇺🇸 Los Angeles", city: "Los Angeles", country: "United States", lat: 34.0923, lng: -118.2904, count: 3, scen: "overnight" as const },
