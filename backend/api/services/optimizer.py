@@ -684,6 +684,9 @@ def run_pipeline(
             rec_method = "classical_exhaustive"
             rec_energy = classical["qubo_energy"]
 
+        # Sort recommended zones so Rank #1 is always the highest QUBO score zone
+        rec_zones = sorted(rec_zones, key=lambda z: float(qubo.c_values[qubo.labels.index(z)]), reverse=True)
+
         # ── STAGE 7: Financial Modeling & ROI Synthesis ──────────────────────
         total_demand = sum(demand_by_label.values())
         zones_indexed = zones_df.set_index("label")

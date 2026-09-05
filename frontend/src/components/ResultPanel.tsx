@@ -79,8 +79,13 @@ export function ResultPanel({
   const co2OffsetTons = Math.round(annualMwh * 0.62);
 
   const sortedZones = [...zone_details].sort((a, b) => {
-    if (selectedSet.has(a.label) && !selectedSet.has(b.label)) return -1;
-    if (!selectedSet.has(a.label) && selectedSet.has(b.label)) return 1;
+    const aSel = selectedSet.has(a.label);
+    const bSel = selectedSet.has(b.label);
+    if (aSel && !bSel) return -1;
+    if (!aSel && bSel) return 1;
+    if (aSel && bSel) {
+      return selected_zones.indexOf(a.label) - selected_zones.indexOf(b.label);
+    }
     return b.qubo_c_value - a.qubo_c_value;
   });
 

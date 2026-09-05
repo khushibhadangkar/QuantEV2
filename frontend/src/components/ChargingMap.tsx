@@ -232,11 +232,13 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
             layersRef.current.push(m);
           });
 
-          // 4. Selected stations: Ranked #1, #2, #3 with prominent badges and reasons
-          const rankedSelZones = [...selZones].sort((a, b) => b.qubo_c_value - a.qubo_c_value);
+          // 4. Selected stations: Ranked #1, #2, #3 matching recommendation.selected_zones
+          const rankedSelZones = [...selZones].sort(
+            (a, b) => selected.indexOf(a.label) - selected.indexOf(b.label)
+          );
 
           rankedSelZones.forEach((z, idx) => {
-            const rank = idx + 1;
+            const rank = selected.indexOf(z.label) + 1;
             const rankColor = rank === 1 ? "#D97706" : rank === 2 ? "#2563EB" : "#059669";
             const rankTitle = rank === 1 ? "Rank #1 · Primary Deployment Site" : rank === 2 ? "Rank #2 · Strategic Network Hub" : "Rank #3 · Grid-Balanced Site";
             const defaultKeyReason = rank === 1
@@ -339,6 +341,9 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
 
       setUserLocation(lat: number, lng: number) {
         if (!mapRef.current) return;
+        clearLayers();
+        lastResultsRef.current = null;
+        setHasResults(false);
         import("leaflet").then(({ default: L }) => {
           const map = mapRef.current;
           if (!map) return;
