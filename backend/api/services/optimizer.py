@@ -724,17 +724,17 @@ def run_pipeline(
             existing_desc = (
                 f"Area already has an active EV charging station ({charge_count} operational bays)"
                 if has_existing
-                else "No existing charging stations (Greenfield deployment site)"
+                else "None (Greenfield Site · Zero Existing Stations)"
             )
 
             raw_key_reason = str(row["key_reason"]) if "key_reason" in row and pd.notna(row["key_reason"]) else (
-                f"Infrastructure Deficit Gap {infra_gap}/10. High daily EV charging congestion."
+                f"Infrastructure Deficit Gap {infra_gap}/10. High unserved daily EV transit demand."
             )
-            # Explicitly highlight whether the area already has an electric charging station
+            # Explicitly highlight that recommended sites are greenfield deployments with zero existing stations
             if has_existing:
                 key_reason = f"⚡ Area already has an electric charging station ({charge_count} active bays). {raw_key_reason}"
             else:
-                key_reason = f"🟢 Greenfield Site (No existing charging stations). {raw_key_reason}"
+                key_reason = raw_key_reason if raw_key_reason.startswith("🟢") else f"🟢 Greenfield Site (Zero existing charging stations). {raw_key_reason}"
 
             is_selected = lbl in rec_zones
             if is_selected:
@@ -871,12 +871,12 @@ def run_pipeline(
         existing_desc = (
             f"Area already has an active EV charging station ({charge_count} operational bays)"
             if has_existing
-            else "No existing charging stations (Greenfield deployment site)"
+            else "None (Greenfield Site · Zero Existing Stations)"
         )
         key_reason = (
-            f"⚡ Area already has an electric charging station ({charge_count} active bays). High daily demand captures critical relief."
+            f"⚡ Area already has an electric charging station ({charge_count} active bays)."
             if has_existing
-            else "🟢 Greenfield Site (No existing charging stations)."
+            else "🟢 Greenfield Site (Zero existing charging stations · High unserved EV demand)."
         )
 
         zone_details.append({
