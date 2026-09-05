@@ -121,6 +121,7 @@ export async function runOptimize(
   return request<OptimizeResponse>("/api/v1/optimize", {
     method: "POST",
     body: JSON.stringify({
+      city: params.city ?? "Mumbai",
       station_count: params.station_count ?? 3,
       scenario: params.scenario ?? "all_hours",
       reps:  params.reps  ?? 1,

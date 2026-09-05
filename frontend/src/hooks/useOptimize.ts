@@ -13,7 +13,7 @@ export function useOptimize() {
   const run = useCallback(async (
     stationCount: number = 3,
     scenario: PlanningScenario = "all_hours",
-    city: string = "San Francisco",
+    city: string = "Mumbai",
   ) => {
     setState({ status: "loading" });
     setLastRunParams({ stationCount, scenario, city });

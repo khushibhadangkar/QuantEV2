@@ -743,6 +743,13 @@ def run_pipeline(
             })
 
         avg_roi = round(sum(roi_list) / max(1, len(roi_list)), 1)
+        recommended_locations = [
+            {
+                "rank": rank_idx + 1,
+                **next(z for z in zone_details if z["label"] == z_lbl)
+            }
+            for rank_idx, z_lbl in enumerate(rec_zones)
+        ]
         log.info(
             "[STAGE 7/7: FINANCIAL & ROI SYNTHESIS] Recommended zones: %s. Total CapEx: $%.0f, Annual Rev: $%.0f, Avg Payback: %.1f yrs.",
             rec_zones, total_cost, total_rev, avg_roi
@@ -760,6 +767,7 @@ def run_pipeline(
             "qaoa":               qaoa,
             "recommendation": {
                 "selected_zones":               rec_zones,
+                "recommended_locations":        recommended_locations,
                 "city":                         bundle.city,
                 "country":                      bundle.country,
                 "scenario":                     scenario,

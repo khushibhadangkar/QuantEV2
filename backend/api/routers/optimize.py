@@ -111,8 +111,12 @@ class ZoneDetail(BaseModel):
     annual_revenue_usd: Optional[float] = None
     key_reason: Optional[str] = None
 
+class RecommendedLocation(ZoneDetail):
+    rank: int
+
 class RecommendationResponse(BaseModel):
     selected_zones: list[str]
+    recommended_locations: Optional[list[RecommendedLocation]] = None
     city: Optional[str] = None
     country: Optional[str] = None
     scenario: str = "all_hours"

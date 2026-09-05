@@ -16,6 +16,7 @@ export interface ChargingMapHandle {
   showResults: (zones: ZoneDetail[], selected: string[]) => void;
   showScenario: (zones: ZoneDetail[], selected: string[], k: number) => void;
   resetToIdle: () => void;
+  focusZone: (lat: number, lng: number) => void;
 }
 
 interface ChargingMapProps {
@@ -63,7 +64,7 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
     const mapRef = useRef<any>(null);
     const userMarkerRef = useRef<any>(null);
     const layersRef = useRef<any[]>([]);
-    const userLatLngRef = useRef<[number, number]>([37.8032, -122.4005]);
+    const userLatLngRef = useRef<[number, number]>([19.0467, 72.8911]);
 
     const [showCoverage, setShowCoverage] = useState(true);
     const [showHeatmap, setShowHeatmap] = useState(false);
@@ -96,8 +97,8 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
         el.style.height = "100%";
 
         const map = L.map(el, {
-          center: [37.8032, -122.4005],
-          zoom: 13,
+          center: [19.0467, 72.8911],
+          zoom: 12,
           zoomControl: false,
           scrollWheelZoom: true,
           attributionControl: true,
@@ -274,11 +275,20 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
             const dist = haversine(uLat, uLng, z.latitude, z.longitude);
             const icon = L.divIcon({
               className: "",
-              html: `<div style="position:relative;width:64px;height:64px;transform:translate(-32px,-32px);cursor:pointer;">
-                <div style="position:absolute;inset:0;border-radius:50%;background:${rankColor};opacity:0.22;animation:pulse-1 2.2s ease-out infinite;"></div>
-                <div style="position:absolute;inset:6px;border-radius:50%;background:${rankColor};opacity:0.15;animation:pulse-2 2.2s ease-out 0.6s infinite;"></div>
-                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:var(--color-navy-900);border:3px solid ${rankColor};box-shadow:0 6px 20px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;">
-                  <span style="color:white;font-family:'Times New Roman',serif;font-weight:700;font-size:13px;letter-spacing:-0.02em;">#${rank}</span>
+              html: `<div style="position:relative;width:240px;height:74px;transform:translate(-120px,-48px);pointer-events:none;cursor:pointer;">
+                <!-- Permanent Floating Name Pill -->
+                <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.96);border:2px solid ${rankColor};border-radius:24px;padding:3px 10px;box-shadow:0 6px 18px rgba(10,22,40,0.22);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;pointer-events:auto;">
+                  <span style="background:${rankColor};color:white;font-family:'Times New Roman',serif;font-weight:700;font-size:11px;padding:1px 6px;border-radius:99px;box-shadow:0 2px 6px ${rankColor}44;">★ #${rank}</span>
+                  <span style="font-family:'Times New Roman',serif;font-weight:700;font-size:12px;color:var(--color-ink);letter-spacing:-0.01em;">${z.name_primary || `Site ${z.label}`}</span>
+                  <span style="font-size:11px;color:var(--color-ink-3);font-weight:600;">${formatDemand(z.predicted_demand_kwh_h)}</span>
+                </div>
+                <!-- Pin Base -->
+                <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:46px;height:46px;pointer-events:auto;">
+                  <div style="position:absolute;inset:0;border-radius:50%;background:${rankColor};opacity:0.25;animation:pulse-1 2.2s ease-out infinite;"></div>
+                  <div style="position:absolute;inset:5px;border-radius:50%;background:${rankColor};opacity:0.18;animation:pulse-2 2.2s ease-out 0.6s infinite;"></div>
+                  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:var(--color-navy-900);border:3px solid ${rankColor};box-shadow:0 4px 16px rgba(0,0,0,0.38);display:flex;align-items:center;justify-content:center;">
+                    <span style="color:white;font-family:'Times New Roman',serif;font-weight:700;font-size:12px;">#${rank}</span>
+                  </div>
                 </div>
               </div>`,
               iconSize: [0, 0],
@@ -286,43 +296,39 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
             });
 
             const m = L.marker([z.latitude, z.longitude], { icon, zIndexOffset: 2000 - idx * 100 }).addTo(map);
-            m.bindPopup(L.popup({ closeButton: true, maxWidth: 320, offset: [0, -10] }).setContent(`
-              <div style="font-family:'Times New Roman',serif;padding:18px 20px;min-width:270px;">
-                <div style="display:inline-flex;align-items:center;gap:6px;background:${rankColor};color:white;font-size:10.5px;font-weight:700;letter-spacing:0.06em;padding:4px 10px;border-radius:99px;margin-bottom:12px;">
+            m.bindPopup(L.popup({ closeButton: true, maxWidth: 300, offset: [0, -32] }).setContent(`
+              <div style="font-family:'Times New Roman',serif;padding:14px 16px;min-width:240px;">
+                <div style="display:inline-flex;align-items:center;gap:6px;background:${rankColor};color:white;font-size:10px;font-weight:700;letter-spacing:0.04em;padding:3px 8px;border-radius:99px;margin-bottom:8px;">
                   ★ ${rankTitle}
                 </div>
-                <div style="font-size:22px;font-weight:700;letter-spacing:-0.02em;color:var(--color-ink);margin-bottom:2px;">
+                <div style="font-size:18px;font-weight:700;letter-spacing:-0.015em;color:var(--color-ink);margin-bottom:2px;line-height:1.2;">
                   ${z.name_primary || `Site ${z.label}`}
                 </div>
-                <div style="font-size:12px;color:var(--color-ink-3);margin-bottom:12px;">
-                  ${z.latitude.toFixed(4)}°, ${z.longitude.toFixed(4)}°
+                <div style="font-size:11px;color:var(--color-ink-3);margin-bottom:8px;">
+                  ${z.name_secondary ? `${z.name_secondary} · ` : ""}${z.latitude.toFixed(4)}°, ${z.longitude.toFixed(4)}°
                 </div>
-                <div style="background:rgba(10,22,40,0.04);border-left:3px solid ${rankColor};border-radius:4px;padding:8px 10px;margin-bottom:12px;font-size:12px;line-height:1.4;color:var(--color-ink-2);">
+                <div style="background:rgba(10,22,40,0.04);border-left:3px solid ${rankColor};border-radius:4px;padding:6px 8px;margin-bottom:10px;font-size:11.5px;line-height:1.35;color:var(--color-ink-2);">
                   <strong>Key Reason:</strong> ${keyReason}
                 </div>
-                <div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--color-border);padding-top:10px;font-size:12px;">
+                <div style="display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--color-border);padding-top:8px;font-size:11px;">
                   <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Predicted Demand</span><span style="font-weight:600;color:var(--color-ink);">${formatDemand(z.predicted_demand_kwh_h)}</span></div>
-                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Infrastructure Gap</span><span style="font-weight:700;color:var(--color-negative);">${z.infrastructure_gap_score ? `${z.infrastructure_gap_score}/10` : "High Deficit"}</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Infrastructure Gap</span><span style="font-weight:700;color:var(--color-negative);">${z.infrastructure_gap_score ? `${z.infrastructure_gap_score}/10 Deficit` : "High Deficit"}</span></div>
                   <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Predicted CapEx</span><span style="font-weight:600;">${z.predicted_cost_usd ? `$${Math.round(z.predicted_cost_usd / 1000)}k USD` : "$120k"}</span></div>
-                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Est. Payback</span><span style="font-weight:700;color:var(--color-positive);">${z.predicted_roi_years ? `~${z.predicted_roi_years} Years` : "~2.0 Years"}</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Est. Payback</span><span style="font-weight:700;color:var(--color-positive);">${z.predicted_roi_years ? `~${z.predicted_roi_years} Years` : "~0.6 Years"}</span></div>
                   <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">QUBO Score (c_j)</span><span style="font-weight:600;">${z.qubo_c_value.toFixed(3)}</span></div>
-                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Distance from Center</span><span>${dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`}</span></div>
                 </div>
               </div>`));
             layersRef.current.push(m);
-
-            if (isNew && idx === 0) {
-              setTimeout(() => m.openPopup(), 600);
-            }
           });
 
+          // Zoom & frame ONLY the 3 selected areas (tight city frame)
           if (isNew && selZones.length > 0) {
-            const pts: [number, number][] = [
-              ...selZones.map((z) => [z.latitude, z.longitude] as [number, number]),
-              userLatLngRef.current,
-            ];
-            map.flyToBounds(L.latLngBounds(pts).pad(0.32), {
-              duration: 1.5, easeLinearity: 0.2,
+            const pts: [number, number][] = selZones.map((z) => [z.latitude, z.longitude] as [number, number]);
+            const bounds = L.latLngBounds(pts).pad(0.35);
+            map.flyToBounds(bounds, {
+              duration: 0.9,
+              easeLinearity: 0.22,
+              maxZoom: 13,
             });
           }
         });
@@ -340,6 +346,7 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
     useImperativeHandle(ref, () => ({
 
       setUserLocation(lat: number, lng: number) {
+        userLatLngRef.current = [lat, lng];
         if (!mapRef.current) return;
         clearLayers();
         lastResultsRef.current = null;
@@ -347,7 +354,6 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
         import("leaflet").then(({ default: L }) => {
           const map = mapRef.current;
           if (!map) return;
-          userLatLngRef.current = [lat, lng];
           if (userMarkerRef.current) { userMarkerRef.current.remove(); userMarkerRef.current = null; }
           const icon = L.divIcon({
             className: "",
@@ -360,7 +366,7 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
             iconSize: [0, 0], iconAnchor: [0, 0],
           });
           userMarkerRef.current = L.marker([lat, lng], { icon, zIndexOffset: 2000 }).addTo(map);
-          map.flyTo([lat, lng], 13, { duration: 1.4, easeLinearity: 0.25 });
+          map.flyTo([lat, lng], 12, { duration: 0.9, easeLinearity: 0.25 });
         });
       },
 
@@ -373,26 +379,24 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
         const maxDemand = Math.max(...zones.map((z) => z.predicted_demand_kwh_h), 1);
         const [uLat, uLng] = userLatLngRef.current;
 
-        // ── Step 0: Fit map to show all zones ──────────────────────────────
-        const bounds = L.latLngBounds(zones.map((z) => [z.latitude, z.longitude] as [number, number])).pad(0.2);
-        map.flyToBounds(bounds, { duration: 1.2, easeLinearity: 0.25 });
-        await delay(1400);
+        // ── Step 0: Fit map to show candidate zones ──────────────────────
+        const bounds = L.latLngBounds(zones.map((z) => [z.latitude, z.longitude] as [number, number])).pad(0.22);
+        map.flyToBounds(bounds, { duration: 0.7, easeLinearity: 0.25 });
+        await delay(350);
 
         // ── Step 1: Demand heatmap — zones pulse in with fill intensity ───
         onSequenceStep?.(0);
         const heatLayers: any[] = [];
         for (let i = 0; i < zones.length; i++) {
-          await delay(i === 0 ? 0 : 120);
           const z = zones[i];
           const ratio = z.predicted_demand_kwh_h / maxDemand;
-          const r = 800 + ratio * 1600; // radius proportional to demand
+          const r = 700 + ratio * 1400; // radius proportional to demand
           const circle = L.circle([z.latitude, z.longitude], {
             radius: r,
             color: demandBorder(z.predicted_demand_kwh_h, maxDemand),
             fillColor: demandColor(z.predicted_demand_kwh_h, maxDemand),
-            fillOpacity: 0.85,
+            fillOpacity: 0.82,
             weight: 1.5,
-            className: "",
           }).addTo(map);
           heatLayers.push(circle);
           layersRef.current.push(circle);
@@ -411,8 +415,6 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
               white-space:nowrap;
               box-shadow:0 2px 8px rgba(10,22,40,0.08);
               transform:translate(-50%,-50%);
-              opacity:0;
-              animation:fade-in 0.4s ease ${0.1 + i * 0.08}s both;
             ">
               <span style="font-weight:600;color:var(--color-navy-700)">${z.name_primary || `Site ${z.label}`}</span>
               <span style="margin-left:4px;color:var(--color-ink-3)">${formatDemand(z.predicted_demand_kwh_h)}</span>
@@ -422,69 +424,60 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
           const lm = L.marker([z.latitude, z.longitude], { icon: label, zIndexOffset: 500 }).addTo(map);
           layersRef.current.push(lm);
         }
-        await delay(1200);
+        await delay(400);
 
-        // ── Step 2: Coverage gap scan — sweep circles from user area ──────
+        // ── Step 2: Coverage gap scan — smooth radial sweeps ──────────────
         onSequenceStep?.(1);
-        for (let i = 0; i < 3; i++) {
-          const sweep = L.circle([uLat, uLng], {
-            radius: 1000 + i * 1200,
-            color: "rgba(10,22,40,0.08)",
-            fillColor: "rgba(10,22,40,0.02)",
-            fillOpacity: 1,
-            weight: 1,
-            dashArray: "3 5",
-          }).addTo(map);
-          layersRef.current.push(sweep);
-          await delay(350);
-        }
-        await delay(900);
+        const sweep1 = L.circle([uLat, uLng], {
+          radius: 2500,
+          color: "rgba(10,22,40,0.15)",
+          fillColor: "rgba(10,22,40,0.03)",
+          fillOpacity: 1,
+          weight: 1.5,
+          dashArray: "3 5",
+        }).addTo(map);
+        const sweep2 = L.circle([uLat, uLng], {
+          radius: 5000,
+          color: "rgba(10,22,40,0.10)",
+          fillColor: "rgba(10,22,40,0.015)",
+          fillOpacity: 1,
+          weight: 1.5,
+          dashArray: "3 5",
+        }).addTo(map);
+        layersRef.current.push(sweep1, sweep2);
+        await delay(350);
 
-        // ── Step 3: Candidate evaluation — highlight each zone briefly ────
+        // ── Step 3: Candidate evaluation & QAOA quantum superposition ─────
         onSequenceStep?.(2);
-        for (let i = 0; i < zones.length; i++) {
-          const z = zones[i];
-          const ring = L.circle([z.latitude, z.longitude], {
-            radius: 400,
-            color: "rgba(64,114,184,0.6)",
-            fillColor: "rgba(64,114,184,0.08)",
-            fillOpacity: 1,
+        const pulseMarkers: any[] = [];
+        for (const z of zones) {
+          const ring = L.circleMarker([z.latitude, z.longitude], {
+            radius: 8,
+            color: "rgba(64,114,184,0.9)",
+            fillColor: "rgba(64,114,184,0.45)",
+            fillOpacity: 0.8,
             weight: 2,
           }).addTo(map);
+          pulseMarkers.push(ring);
           layersRef.current.push(ring);
-          await delay(180);
-          // Fade ring out
-          setTimeout(() => { try { ring.setStyle({ opacity: 0.15, fillOpacity: 0.03 }); } catch {} }, 300);
         }
-        await delay(600);
+        await delay(350);
 
-        // ── Step 4: QAOA solving — pulsing wave effect ────────────────────
+        // ── Step 4: QAOA solver convergence ──────────────────────────────
         onSequenceStep?.(3);
-        for (let wave = 0; wave < 2; wave++) {
-          for (const z of zones) {
-            const r = L.circleMarker([z.latitude, z.longitude], {
-              radius: 6,
-              color: "rgba(64,114,184,0.8)",
-              fillColor: "rgba(64,114,184,0.4)",
-              fillOpacity: 1,
-              weight: 2,
-            }).addTo(map);
-            layersRef.current.push(r);
-            setTimeout(() => { try { r.setStyle({ color: "rgba(10,22,40,0.15)", fillOpacity: 0.05 }); } catch {} }, 400);
-          }
-          await delay(500);
-        }
-        await delay(600);
+        pulseMarkers.forEach((r) => {
+          try { r.setStyle({ color: "rgba(10,22,40,0.2)", fillOpacity: 0.1 }); } catch {}
+        });
+        await delay(300);
 
-        // ── Step 5: Clear intermediate layers, keep heatmap faded ─────────
+        // ── Step 5: Clear intermediate layers, fade heatmap ───────────────
         onSequenceStep?.(4);
-        // Fade down heatmap circles
         heatLayers.forEach((c) => {
           try {
             c.setStyle({ fillOpacity: 0.15, weight: 0.5, opacity: 0.25 });
           } catch {}
         });
-        await delay(400);
+        await delay(150);
       },
 
       showResults(zones: ZoneDetail[], selected: string[]) {
@@ -504,9 +497,9 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
         clearLayers();
         lastResultsRef.current = null;
         setHasResults(false);
-        userLatLngRef.current = [37.8032, -122.4005];
+        userLatLngRef.current = [19.0467, 72.8911];
         if (mapRef.current) {
-          mapRef.current.flyTo([37.8032, -122.4005], 13, { duration: 1.2, easeLinearity: 0.3 });
+          mapRef.current.flyTo([19.0467, 72.8911], 12, { duration: 1.0, easeLinearity: 0.25 });
         }
       },
     }));

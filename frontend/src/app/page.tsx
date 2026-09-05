@@ -35,12 +35,12 @@ export default function Page() {
   const mapRef = useRef<ChargingMapHandle>(null);
   const resultScrollRef = useRef<HTMLDivElement>(null);
 
-  const [selectedCountry, setSelectedCountry] = useState("United States");
-  const [selectedCity, setSelectedCity] = useState("San Francisco");
+  const [selectedCountry, setSelectedCountry] = useState("India");
+  const [selectedCity, setSelectedCity] = useState("Mumbai");
   const [phase, setPhase] = useState<UIPhase>("idle");
-  const [userLat, setUserLat] = useState(CITY_CONFIGS["San Francisco"].lat);
-  const [userLng, setUserLng] = useState(CITY_CONFIGS["San Francisco"].lng);
-  const [locationName, setLocationName] = useState("San Francisco");
+  const [userLat, setUserLat] = useState(CITY_CONFIGS["Mumbai"].lat);
+  const [userLng, setUserLng] = useState(CITY_CONFIGS["Mumbai"].lng);
+  const [locationName, setLocationName] = useState("Mumbai");
   const [stationCount, setStationCount] = useState(3);
   const [scenario, setScenario] = useState<PlanningScenario>("all_hours");
   const [sequenceStep, setSequenceStep] = useState(0);
@@ -53,15 +53,35 @@ export default function Page() {
     setSelectedCountry(country);
   }, []);
 
-  const handleCitySelect = useCallback((city: string, country: string, lat: number, lng: number) => {
-    setSelectedCity(city);
-    setSelectedCountry(country);
-    setUserLat(lat);
-    setUserLng(lng);
-    setLocationName(city);
-    setPhase("located");
-    mapRef.current?.setUserLocation(lat, lng);
-  }, []);
+  const handleTriggerCityOptimization = useCallback(
+    async (city: string, country: string, lat: number, lng: number, count?: number, scen?: PlanningScenario) => {
+      const finalCount = count ?? stationCount;
+      const finalScen = scen ?? scenario;
+      setSelectedCity(city);
+      setSelectedCountry(country);
+      setUserLat(lat);
+      setUserLng(lng);
+      setLocationName(city);
+      if (count !== undefined) setStationCount(count);
+      if (scen !== undefined) setScenario(scen);
+
+      // Smoothly navigate map to selected city
+      mapRef.current?.setUserLocation(lat, lng);
+
+      // Immediately run quantum optimization analysis
+      setPhase("searching");
+      setSequenceStep(0);
+      await run(finalCount, finalScen, city);
+    },
+    [stationCount, scenario, run]
+  );
+
+  const handleCitySelect = useCallback(
+    (city: string, country: string, lat: number, lng: number) => {
+      handleTriggerCityOptimization(city, country, lat, lng);
+    },
+    [handleTriggerCityOptimization]
+  );
 
   const handleSearch = useCallback(async () => {
     setPhase("searching");
@@ -70,56 +90,30 @@ export default function Page() {
     await apiPromise;
   }, [run, stationCount, scenario, selectedCity]);
 
-
-
   // Transition on API state change (render-phase ref pattern)
-
   const prevStatusRef = useRef(state.status);
-
   if (state.status !== prevStatusRef.current) {
-
     prevStatusRef.current = state.status;
-
     if (state.status === "success") {
-
       // Drive map animation with microtask
-
       Promise.resolve().then(async () => {
-
         if (state.status !== "success") return;
-
         const { zone_details, selected_zones } = state.data.recommendation;
 
-        // Run the full 5-stage optimization sequence on the map
-
+        // Run the fast, sleek optimization sequence on the map
         await mapRef.current?.runOptimizationSequence(zone_details);
 
-
-
-        // Force sequence to completion state briefly before transitioning
-
         setSequenceStep(5);
-
-        await new Promise((r) => setTimeout(r, 600));
-
-
+        await new Promise((r) => setTimeout(r, 150));
 
         // Then reveal the results
-
         setPhase("result");
-
         mapRef.current?.showResults(zone_details, selected_zones);
 
-
-
         setTimeout(() => {
-
           resultScrollRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-
-        }, 300);
-
+        }, 150);
       });
-
     }
 
     if (state.status === "error") {
@@ -363,15 +357,14 @@ export default function Page() {
                           key={preset.label}
                           type="button"
                           onClick={() => {
-                            setSelectedCity(preset.city);
-                            setSelectedCountry(preset.country);
-                            setLocationName(preset.city);
-                            setUserLat(preset.lat);
-                            setUserLng(preset.lng);
-                            setStationCount(preset.count);
-                            setScenario(preset.scen);
-                            setPhase("located");
-                            mapRef.current?.setUserLocation(preset.lat, preset.lng);
+                            handleTriggerCityOptimization(
+                              preset.city,
+                              preset.country,
+                              preset.lat,
+                              preset.lng,
+                              preset.count,
+                              preset.scen
+                            );
                           }}
                           style={{
                             padding: "4px 8px",

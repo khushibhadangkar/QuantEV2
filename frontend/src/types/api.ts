@@ -45,8 +45,13 @@ export interface ZoneDetail {
   key_reason?: string;
 }
 
+export interface RecommendedLocation extends ZoneDetail {
+  rank: number;
+}
+
 export interface RecommendationResponse {
   selected_zones: string[];
+  recommended_locations?: RecommendedLocation[];
   city?: string;
   country?: string;
   scenario?: string;

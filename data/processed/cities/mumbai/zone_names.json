@@ -4,31 +4,31 @@
     "secondary": "Corporate & Financial Core"
   },
   "Z1": {
-    "primary": "Navi Mumbai Vashi Gateway",
+    "primary": "Navi Mumbai (Vashi Gateway)",
     "secondary": "Eastern Express Commercial Belt"
   },
   "Z2": {
-    "primary": "Powai & Kanjurmarg Tech Valley",
+    "primary": "Powai & Hiranandani Tech Valley",
     "secondary": "Central Suburbs IT Corridor"
   },
   "Z3": {
-    "primary": "South Mumbai Financial Core",
-    "secondary": "Nariman Point & Fort District"
+    "primary": "Nariman Point & Marine Drive",
+    "secondary": "South Mumbai Coastal Business Corridor"
   },
   "Z4": {
     "primary": "Andheri West & Lokhandwala",
     "secondary": "Western Media & Retail Hub"
   },
   "Z5": {
-    "primary": "Lower Parel Corporate District",
-    "secondary": "High Street Phoenix & Mills Hub"
+    "primary": "South Mumbai (Colaba & Fort CBD)",
+    "secondary": "Ballard Pier & Gateway Commercial District"
   },
   "Z6": {
-    "primary": "Ghatkopar & Kurla East Junction",
-    "secondary": "Central Transit Interchange"
+    "primary": "Ghatkopar & Kurla Central Junction",
+    "secondary": "Central Transit & Metro Interchange"
   },
   "Z7": {
-    "primary": "Dadar & Worli Seaface Hub",
-    "secondary": "Prabhadevi & Coastal Corridor"
+    "primary": "Lower Parel & Dadar Commercial Hub",
+    "secondary": "High Street Phoenix & Mills District"
   }
 }
