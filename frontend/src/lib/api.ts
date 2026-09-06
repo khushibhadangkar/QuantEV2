@@ -3,7 +3,7 @@
  * Base URL: http://localhost:8000
  */
 
-import type { OptimizeRequest, OptimizeResponse } from "@/types/api";
+import type { OptimizeRequest, OptimizeResponse, LiveDataResponse } from "@/types/api";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -137,3 +137,19 @@ export async function runOptimize(
 export async function getHealth(): Promise<{ status: string; service: string }> {
   return request("/api/v1/health");
 }
+
+/**
+ * GET /api/v1/live-stations
+ * Fetch live or fallback stations for a city.
+ */
+export async function fetchLiveStations(
+  city: string = "Mumbai",
+  maxResults: number = 50,
+): Promise<LiveDataResponse> {
+  const query = new URLSearchParams({
+    city,
+    max_results: String(maxResults),
+  });
+  return request<LiveDataResponse>(`/api/v1/live-stations?${query.toString()}`);
+}
+

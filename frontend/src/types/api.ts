@@ -157,3 +157,34 @@ export type AsyncState<T> =
   | { status: "loading" }
   | { status: "success"; data: T }
   | { status: "error"; message: string };
+
+// ── Live Data Enrichment ─────────────────────────────────────────────────────
+
+export interface LiveStation {
+  station_id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  address?: string | null;
+  operator?: string | null;
+  status: string;
+  is_operational: boolean;
+  power_kw?: number | null;
+  bays: number;
+  connector_types: string[];
+  usage_cost?: string | null;
+  source: "open_charge_map" | "kaggle_baseline";
+  last_status_update?: string | null;
+}
+
+export interface LiveDataResponse {
+  city: string;
+  is_live: boolean;
+  source: "open_charge_map" | "kaggle_baseline";
+  status_message: string;
+  live_station_count: number;
+  last_updated: string;
+  stations: LiveStation[];
+  fallback_reason?: string | null;
+}
+

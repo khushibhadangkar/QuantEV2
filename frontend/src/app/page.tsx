@@ -7,6 +7,7 @@ import { useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 
 import { useOptimize } from "@/hooks/useOptimize";
+import { useLiveData } from "@/hooks/useLiveData";
 
 import { CountryCitySelector, CITY_CONFIGS } from "@/components/CountryCitySelector";
 import { OptimizationSequence } from "@/components/OptimizationSequence";
@@ -37,6 +38,16 @@ export default function Page() {
 
   const [selectedCountry, setSelectedCountry] = useState("India");
   const [selectedCity, setSelectedCity] = useState("Mumbai");
+
+  // Live data enrichment from Open Charge Map (with Kaggle baseline fallback)
+  const {
+    data: liveData,
+    isLive,
+    stationCount: liveCount,
+    lastUpdatedTime,
+    fallbackReason,
+  } = useLiveData(selectedCity);
+
   const [phase, setPhase] = useState<UIPhase>("idle");
   const [userLat, setUserLat] = useState(CITY_CONFIGS["Mumbai"].lat);
   const [userLng, setUserLng] = useState(CITY_CONFIGS["Mumbai"].lng);
@@ -202,6 +213,55 @@ export default function Page() {
 
 
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {/* Subtle Live Data indicator pill */}
+          {liveData && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "4px 10px",
+                borderRadius: "8px",
+                border: isLive
+                  ? "1px solid rgba(16, 185, 129, 0.4)"
+                  : "1px solid var(--color-border)",
+                background: isLive
+                  ? "rgba(16, 185, 129, 0.08)"
+                  : "rgba(243, 244, 246, 0.7)",
+                color: isLive ? "#047857" : "var(--color-ink-3)",
+                fontFamily: "Times New Roman, serif",
+                fontSize: "11.5px",
+                letterSpacing: "0.02em",
+                cursor: "default",
+                userSelect: "none",
+                transition: "all 0.15s ease",
+              }}
+              title={
+                isLive
+                  ? `Open Charge Map API (Live): ${liveCount} live stations returned for ${selectedCity}. Last updated: ${lastUpdatedTime}.`
+                  : `Kaggle Baseline Dataset: ${liveCount} verified stations loaded for ${selectedCity} (${fallbackReason || "API offline"}). Last updated: ${lastUpdatedTime}.`
+              }
+            >
+              <span
+                style={{
+                  width: "6px",
+                  height: "6px",
+                  borderRadius: "50%",
+                  background: isLive ? "#10b981" : "#9ca3af",
+                  boxShadow: isLive ? "0 0 6px rgba(16,185,129,0.8)" : "none",
+                  display: "inline-block",
+                  flexShrink: 0,
+                }}
+              />
+              <span style={{ fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                {isLive ? "LIVE DATA" : "BASELINE DATA"}
+              </span>
+              <span style={{ color: isLive ? "rgba(4,120,87,0.7)" : "var(--color-ink-4)", fontSize: "11px" }}>
+                · {liveCount} stations · {lastUpdatedTime}
+              </span>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={() => setQuantumModalOpen(true)}
@@ -282,6 +342,8 @@ export default function Page() {
             ref={mapRef}
 
             onSequenceStep={setSequenceStep}
+
+            liveStations={liveData?.stations}
 
           />
 

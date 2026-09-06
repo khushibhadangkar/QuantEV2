@@ -8,7 +8,7 @@ import {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import type { ZoneDetail } from "@/types/api";
+import type { ZoneDetail, LiveStation } from "@/types/api";
 
 export interface ChargingMapHandle {
   setUserLocation: (lat: number, lng: number) => void;
@@ -21,6 +21,7 @@ export interface ChargingMapHandle {
 interface ChargingMapProps {
   onSequenceStep?: (step: number) => void;
   onReady?: () => void;
+  liveStations?: LiveStation[];
 }
 
 function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -58,22 +59,29 @@ function delay(ms: number) {
 }
 
 const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
-  ({ onSequenceStep, onReady }, ref) => {
+  ({ onSequenceStep, onReady, liveStations }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<any>(null);
     const userMarkerRef = useRef<any>(null);
     const layersRef = useRef<any[]>([]);
+    const liveStationLayersRef = useRef<any[]>([]);
     const userLatLngRef = useRef<[number, number]>([37.8032, -122.4005]);
 
     const [showCoverage, setShowCoverage] = useState(true);
     const [showHeatmap, setShowHeatmap] = useState(false);
     const [showFleetFlow, setShowFleetFlow] = useState(true);
+    const [showLiveStations, setShowLiveStations] = useState(true);
     const [hasResults, setHasResults] = useState(false);
     const lastResultsRef = useRef<{ zones: ZoneDetail[]; selected: string[] } | null>(null);
 
     const clearLayers = useCallback(() => {
       layersRef.current.forEach((l) => { try { l.remove(); } catch {} });
       layersRef.current = [];
+    }, []);
+
+    const clearLiveStationLayers = useCallback(() => {
+      liveStationLayersRef.current.forEach((l) => { try { l.remove(); } catch {} });
+      liveStationLayersRef.current = [];
     }, []);
 
     useEffect(() => {
@@ -338,6 +346,76 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
       }
     }, [showCoverage, showHeatmap, showFleetFlow, renderOverlayLayers]);
 
+    // Render nearby live/baseline stations on the map
+    const renderLiveStationLayers = useCallback(() => {
+      import("leaflet").then(({ default: L }) => {
+        const map = mapRef.current;
+        if (!map) return;
+        clearLiveStationLayers();
+
+        if (!showLiveStations || !liveStations || liveStations.length === 0) return;
+
+        liveStations.forEach((s) => {
+          const isOcm = s.source === "open_charge_map";
+          const markerColor = isOcm ? "#059669" : "#2563eb";
+          const icon = L.divIcon({
+            className: "",
+            html: `<div style="
+              width: 14px;
+              height: 14px;
+              border-radius: 50%;
+              background: ${markerColor};
+              border: 2px solid white;
+              box-shadow: 0 1px 5px rgba(0,0,0,0.28);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+              transform: translate(-7px, -7px);
+            ">
+              <div style="width: 4px; height: 4px; border-radius: 50%; background: white;"></div>
+            </div>`,
+            iconSize: [0, 0],
+            iconAnchor: [0, 0],
+          });
+
+          const m = L.marker([s.latitude, s.longitude], { icon, zIndexOffset: 350 }).addTo(map);
+          m.bindPopup(
+            L.popup({ closeButton: true, maxWidth: 280, offset: [0, -6] }).setContent(`
+              <div style="font-family:Times New Roman,serif;padding:14px 16px;min-width:220px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:10px;letter-spacing:0.06em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:${isOcm ? 'rgba(5,150,105,0.1)' : 'rgba(37,99,235,0.1)'};color:${markerColor};font-weight:700;">
+                    ${isOcm ? '⚡ Live Station (OCM)' : '⚡ Baseline Station'}
+                  </span>
+                  <span style="font-size:11px;color:${s.is_operational ? '#059669' : '#dc2626'};font-weight:600;">
+                    ${s.status}
+                  </span>
+                </div>
+                <div style="font-size:15px;font-weight:700;color:var(--color-ink);letter-spacing:-0.01em;margin-bottom:4px;line-height:1.3;">
+                  ${s.name}
+                </div>
+                ${s.address ? `<div style="font-size:11px;color:var(--color-ink-3);margin-bottom:8px;">${s.address}</div>` : ''}
+                <div style="display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--color-border);padding-top:8px;font-size:11.5px;">
+                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Operator</span><span style="font-weight:600;">${s.operator || 'Independent'}</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Capacity / Power</span><span style="font-weight:600;">${s.power_kw ? `${s.power_kw} kW` : 'Standard AC/DC'}</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Charging Bays</span><span style="font-weight:600;">${s.bays} bays</span></div>
+                  ${s.connector_types && s.connector_types.length > 0 ? `<div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Plugs</span><span>${s.connector_types.slice(0, 2).join(', ')}</span></div>` : ''}
+                  ${s.usage_cost ? `<div style="display:flex;justify-content:space-between;"><span style="color:var(--color-ink-4);">Tariff</span><span>${s.usage_cost}</span></div>` : ''}
+                  <div style="display:flex;justify-content:space-between;margin-top:2px;padding-top:4px;border-top:1px dashed var(--color-border-subtle);"><span style="color:var(--color-ink-4);">Source</span><span style="color:var(--color-ink-3);font-size:10.5px;">${isOcm ? 'Open Charge Map API' : 'Kaggle Global EV Dataset'}</span></div>
+                </div>
+              </div>
+            `)
+          );
+          liveStationLayersRef.current.push(m);
+        });
+      });
+    }, [clearLiveStationLayers, liveStations, showLiveStations]);
+
+    // Re-render live stations when toggled or when liveStations data updates
+    useEffect(() => {
+      renderLiveStationLayers();
+    }, [renderLiveStationLayers]);
+
     useImperativeHandle(ref, () => ({
 
       setUserLocation(lat: number, lng: number) {
@@ -504,7 +582,7 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
         <div ref={containerRef} style={{ position: "absolute", inset: 0, background: "#e8edf4" }} />
 
         {/* GIS Map Layer Controls */}
-        {hasResults && (
+        {(hasResults || (liveStations && liveStations.length > 0)) && (
           <div
             className="anim-fade-in glass"
             style={{
@@ -524,57 +602,80 @@ const ChargingMap = forwardRef<ChargingMapHandle, ChargingMapProps>(
             <span style={{ fontFamily: "Times New Roman, serif", fontSize: "11px", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--color-ink-4)", marginRight: "2px" }}>
               Layers:
             </span>
-            <button
-              onClick={() => setShowCoverage((prev: boolean) => !prev)}
-              style={{
-                padding: "4px 10px",
-                borderRadius: "6px",
-                border: "none",
-                background: showCoverage ? "var(--color-navy-900)" : "var(--color-grey-100)",
-                color: showCoverage ? "white" : "var(--color-ink-3)",
-                fontFamily: "Times New Roman, serif",
-                fontSize: "12px",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-              }}
-              title="Toggle 3km adjacency coverage reach"
-            >
-              {showCoverage ? "✓ " : ""}3km Reach
-            </button>
-            <button
-              onClick={() => setShowHeatmap((prev: boolean) => !prev)}
-              style={{
-                padding: "4px 10px",
-                borderRadius: "6px",
-                border: "none",
-                background: showHeatmap ? "var(--color-navy-900)" : "var(--color-grey-100)",
-                color: showHeatmap ? "white" : "var(--color-ink-3)",
-                fontFamily: "Times New Roman, serif",
-                fontSize: "12px",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-              }}
-              title="Toggle predicted EV demand intensity heat circles"
-            >
-              {showHeatmap ? "✓ " : ""}Demand Heatmap
-            </button>
-            <button
-              onClick={() => setShowFleetFlow((prev: boolean) => !prev)}
-              style={{
-                padding: "4px 10px",
-                borderRadius: "6px",
-                border: "none",
-                background: showFleetFlow ? "var(--color-navy-900)" : "var(--color-grey-100)",
-                color: showFleetFlow ? "white" : "var(--color-ink-3)",
-                fontFamily: "Times New Roman, serif",
-                fontSize: "12px",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-              }}
-              title="Toggle commercial fleet dispatch vectors to nearest charging hubs"
-            >
-              {showFleetFlow ? "✓ " : ""}Fleet Dispatch
-            </button>
+            {hasResults && (
+              <>
+                <button
+                  onClick={() => setShowCoverage((prev: boolean) => !prev)}
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: "6px",
+                    border: "none",
+                    background: showCoverage ? "var(--color-navy-900)" : "var(--color-grey-100)",
+                    color: showCoverage ? "white" : "var(--color-ink-3)",
+                    fontFamily: "Times New Roman, serif",
+                    fontSize: "12px",
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                  title="Toggle 3km adjacency coverage reach"
+                >
+                  {showCoverage ? "✓ " : ""}3km Reach
+                </button>
+                <button
+                  onClick={() => setShowHeatmap((prev: boolean) => !prev)}
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: "6px",
+                    border: "none",
+                    background: showHeatmap ? "var(--color-navy-900)" : "var(--color-grey-100)",
+                    color: showHeatmap ? "white" : "var(--color-ink-3)",
+                    fontFamily: "Times New Roman, serif",
+                    fontSize: "12px",
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                  title="Toggle predicted EV demand intensity heat circles"
+                >
+                  {showHeatmap ? "✓ " : ""}Demand Heatmap
+                </button>
+                <button
+                  onClick={() => setShowFleetFlow((prev: boolean) => !prev)}
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: "6px",
+                    border: "none",
+                    background: showFleetFlow ? "var(--color-navy-900)" : "var(--color-grey-100)",
+                    color: showFleetFlow ? "white" : "var(--color-ink-3)",
+                    fontFamily: "Times New Roman, serif",
+                    fontSize: "12px",
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                  title="Toggle commercial fleet dispatch vectors to nearest charging hubs"
+                >
+                  {showFleetFlow ? "✓ " : ""}Fleet Dispatch
+                </button>
+              </>
+            )}
+            {liveStations && liveStations.length > 0 && (
+              <button
+                onClick={() => setShowLiveStations((prev: boolean) => !prev)}
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: "6px",
+                  border: "none",
+                  background: showLiveStations ? "var(--color-navy-900)" : "var(--color-grey-100)",
+                  color: showLiveStations ? "white" : "var(--color-ink-3)",
+                  fontFamily: "Times New Roman, serif",
+                  fontSize: "12px",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+                title="Toggle nearby live/baseline charging station pins on the map"
+              >
+                {showLiveStations ? "✓ " : ""}Stations ({liveStations.length})
+              </button>
+            )}
           </div>
         )}
       </div>

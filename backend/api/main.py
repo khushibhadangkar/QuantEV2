@@ -26,6 +26,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.routers import health
+from backend.api.routers import live_data
 from backend.api.routers import optimize
 from backend.api.services.optimizer import warm_up
 
@@ -90,6 +91,12 @@ app.include_router(
     health.router,
     prefix="/api/v1",
     tags=["health"],
+)
+
+app.include_router(
+    live_data.router,
+    prefix="/api/v1",
+    tags=["live-data"],
 )
 
 app.include_router(
